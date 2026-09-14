@@ -1,16 +1,511 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>GH page</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Alireza Programmer — Resume / رزومه علیرضا برنامه‌نویس">
+  <title>Alireza Programmer — Resume</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #1a2332;
+      --ink-soft: #3d4a5c;
+      --muted: #6b7788;
+      --paper: #f7f5f1;
+      --panel: rgba(255, 252, 248, 0.88);
+      --line: rgba(26, 35, 50, 0.12);
+      --accent: #0f766e;
+      --accent-deep: #0a4f4a;
+      --glow: rgba(15, 118, 110, 0.18);
+      --shadow: 0 24px 60px rgba(26, 35, 50, 0.12);
+      --radius: 18px;
+      --font-display: "Fraunces", "Vazirmatn", Georgia, serif;
+      --font-body: "Source Sans 3", "Vazirmatn", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font-body);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, rgba(15, 118, 110, 0.16), transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, rgba(180, 120, 60, 0.12), transparent 50%),
+        linear-gradient(165deg, #ebe6de 0%, var(--paper) 42%, #e4ebe9 100%);
+      line-height: 1.55;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.45'/%3E%3C/svg%3E");
+      mix-blend-mode: multiply;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      padding: 1rem 1.25rem;
+      backdrop-filter: blur(10px);
+      background: rgba(247, 245, 241, 0.72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .lang-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink-soft);
+      font: 600 0.9rem/1 var(--font-body);
+      padding: 0.55rem 0.95rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.2s ease;
+    }
+
+    .lang-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .lang-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .page {
+      width: min(860px, calc(100% - 2rem));
+      margin: 1.5rem auto 3rem;
+      animation: rise 0.7s ease both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sheet {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .hero {
+      position: relative;
+      padding: clamp(1.75rem, 4vw, 2.75rem);
+      background:
+        linear-gradient(135deg, rgba(15, 118, 110, 0.1), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.55), transparent);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      top: -40px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--glow);
+      filter: blur(10px);
+      animation: pulse 5s ease-in-out infinite;
+    }
+
+    html[dir="rtl"] .hero::after {
+      right: auto;
+      left: -40px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.55; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.08); }
+    }
+
+    .brand {
+      position: relative;
+      z-index: 1;
+      font-family: var(--font-display);
+      font-size: clamp(2rem, 5vw, 2.85rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--ink);
+      margin-bottom: 0.45rem;
+    }
+
+    .role {
+      position: relative;
+      z-index: 1;
+      color: var(--accent-deep);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .summary {
+      position: relative;
+      z-index: 1;
+      max-width: 58ch;
+      color: var(--ink-soft);
+      font-size: 1.02rem;
+    }
+
+    .contacts {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem 1.1rem;
+      margin-top: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .contacts a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .contacts a:hover {
+      color: var(--accent-deep);
+      border-bottom-color: var(--accent);
+    }
+
+    .body {
+      padding: clamp(1.5rem, 3.5vw, 2.25rem);
+      display: grid;
+      gap: 1.75rem;
+    }
+
+    section h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.85rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skill {
+      background: rgba(15, 118, 110, 0.08);
+      color: var(--accent-deep);
+      border: 1px solid rgba(15, 118, 110, 0.18);
+      padding: 0.35rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      animation: fadein 0.5s ease both;
+    }
+
+    .skill:nth-child(2) { animation-delay: 0.05s; }
+    .skill:nth-child(3) { animation-delay: 0.1s; }
+    .skill:nth-child(4) { animation-delay: 0.15s; }
+    .skill:nth-child(5) { animation-delay: 0.2s; }
+    .skill:nth-child(6) { animation-delay: 0.25s; }
+    .skill:nth-child(7) { animation-delay: 0.3s; }
+    .skill:nth-child(8) { animation-delay: 0.35s; }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .item { margin-bottom: 1.15rem; }
+    .item:last-child { margin-bottom: 0; }
+
+    .item h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0.2rem 0 0.45rem;
+    }
+
+    .item p, .item li {
+      color: var(--ink-soft);
+      font-size: 0.98rem;
+    }
+
+    .item ul {
+      list-style: none;
+      display: grid;
+      gap: 0.35rem;
+      margin-top: 0.35rem;
+    }
+
+    .item li::before {
+      content: "–";
+      color: var(--accent);
+      margin-inline-end: 0.45rem;
+      font-weight: 700;
+    }
+
+    .item a {
+      color: var(--accent-deep);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .item a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 0 1rem 2rem;
+    }
+
+    [data-i18n] { display: none; }
+    html[lang="en"] [data-i18n="en"],
+    html[lang="fa"] [data-i18n="fa"] { display: block; }
+    html[lang="en"] span[data-i18n="en"],
+    html[lang="fa"] span[data-i18n="fa"],
+    html[lang="en"] a[data-i18n="en"],
+    html[lang="fa"] a[data-i18n="fa"] { display: inline; }
+
+    html[lang="fa"] {
+      --font-display: "Vazirmatn", "Fraunces", sans-serif;
+      --font-body: "Vazirmatn", "Source Sans 3", sans-serif;
+    }
+
+    html[lang="fa"] body { line-height: 1.75; }
+    html[lang="fa"] .brand { letter-spacing: 0; }
+
+    @media (max-width: 560px) {
+      .page { width: min(100%, calc(100% - 1rem)); margin-top: 0.75rem; }
+      .contacts { flex-direction: column; gap: 0.45rem; }
+    }
+
+    @media print {
+      body, body::before { background: #fff; }
+      .topbar { display: none; }
+      .page { width: 100%; margin: 0; }
+      .sheet { box-shadow: none; border: none; }
+    }
+  </style>
 </head>
 <body>
-<h1>
-    Hello World!
-</h1>
-<h2>
-    First Project
-</h2>
+  <div class="topbar" role="navigation" aria-label="Language">
+    <button class="lang-btn active" type="button" data-lang="en" aria-pressed="true">English</button>
+    <button class="lang-btn" type="button" data-lang="fa" aria-pressed="false">فارسی</button>
+  </div>
+
+  <main class="page">
+    <article class="sheet">
+      <header class="hero">
+        <h1 class="brand">
+          <span data-i18n="en">Alireza Programmer</span>
+          <span data-i18n="fa">علیرضا برنامه‌نویس</span>
+        </h1>
+        <p class="role">
+          <span data-i18n="en">Software Developer · Bot &amp; Automation Builder · Content Creator</span>
+          <span data-i18n="fa">توسعه‌دهنده نرم‌افزار · سازنده ربات و اتوماسیون · مدرس و تولیدکننده محتوا</span>
+        </p>
+        <p class="summary">
+          <span data-i18n="en">I build practical tools and full-stack apps — Telegram bots, Cloudflare Workers, React dashboards, and automation systems — and share programming tutorials on YouTube.</span>
+          <span data-i18n="fa">ابزارهای کاربردی و اپلیکیشن‌های فول‌استک می‌سازم — ربات‌های تلگرام، Cloudflare Workers، داشبوردهای React و سیستم‌های اتوماسیون — و آموزش برنامه‌نویسی را در یوتیوب منتشر می‌کنم.</span>
+        </p>
+        <div class="contacts">
+          <a href="mailto:alirezaprogrammermaker@gmail.com">alirezaprogrammermaker@gmail.com</a>
+          <a href="https://github.com/alirezaprogrammermaker" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://youtube.com/channel/UCe6dqJXYW5OfLHLz79dUq7g" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://alirezaprogrammermaker.github.io" target="_blank" rel="noopener">
+            <span data-i18n="en">Website</span>
+            <span data-i18n="fa">وب‌سایت</span>
+          </a>
+        </div>
+      </header>
+
+      <div class="body">
+        <section aria-labelledby="skills-title">
+          <h2 id="skills-title">
+            <span data-i18n="en">Skills</span>
+            <span data-i18n="fa">مهارت‌ها</span>
+          </h2>
+          <div class="skills">
+            <span class="skill">Python</span>
+            <span class="skill">TypeScript / JavaScript</span>
+            <span class="skill">PHP</span>
+            <span class="skill">React</span>
+            <span class="skill">Cloudflare Workers</span>
+            <span class="skill">Telegram Bots</span>
+            <span class="skill">Hono / API</span>
+            <span class="skill">Go</span>
+          </div>
+        </section>
+
+        <section aria-labelledby="exp-title">
+          <h2 id="exp-title">
+            <span data-i18n="en">Experience</span>
+            <span data-i18n="fa">سوابق</span>
+          </h2>
+
+          <div class="item">
+            <h3>
+              <span data-i18n="en">Independent Software Developer</span>
+              <span data-i18n="fa">توسعه‌دهنده نرم‌افزار مستقل</span>
+            </h3>
+            <p class="meta">
+              <span data-i18n="en">Alireza Programmer Maker · 2020 — Present</span>
+              <span data-i18n="fa">Alireza Programmer Maker · ۱۳۹۹ — اکنون</span>
+            </p>
+            <ul>
+              <li data-i18n="en">Design and ship automation tools, Telegram bots, and web panels for real-world use.</li>
+              <li data-i18n="fa">طراحی و انتشار ابزارهای اتوماسیون، ربات‌های تلگرام و پنل‌های وب برای استفاده واقعی.</li>
+              <li data-i18n="en">Build full-stack products on Cloudflare (Workers, D1) with React admin dashboards.</li>
+              <li data-i18n="fa">ساخت محصولات فول‌استک روی Cloudflare (Workers و D1) به‌همراه داشبورد مدیریت React.</li>
+              <li data-i18n="en">Create programming tutorials and tip videos for a growing YouTube audience.</li>
+              <li data-i18n="fa">تولید آموزش‌های برنامه‌نویسی و ویدیوهای ترفند برای مخاطبان یوتیوب.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section aria-labelledby="projects-title">
+          <h2 id="projects-title">
+            <span data-i18n="en">Selected Projects</span>
+            <span data-i18n="fa">پروژه‌های منتخب</span>
+          </h2>
+
+          <div class="item">
+            <h3>
+              <a href="https://github.com/alirezaprogrammermaker/social-media-panel" target="_blank" rel="noopener">Social Media Panel</a>
+            </h3>
+            <p class="meta">TypeScript · React · Cloudflare Workers · Hono</p>
+            <p>
+              <span data-i18n="en">Full-stack SMM panel with Telegram bot, AI receipt verification, and admin dashboard.</span>
+              <span data-i18n="fa">پنل فول‌استک شبکه‌های اجتماعی با ربات تلگرام، تأیید فیش با هوش مصنوعی و داشبورد ادمین.</span>
+            </p>
+          </div>
+
+          <div class="item">
+            <h3>
+              <a href="https://github.com/alirezaprogrammermaker/telegram-auto" target="_blank" rel="noopener">Telegram Auto</a>
+            </h3>
+            <p class="meta">Python · Telethon</p>
+            <p>
+              <span data-i18n="en">Modular Telethon automation for Telegram account workflows.</span>
+              <span data-i18n="fa">اتوماسیون ماژولار Telethon برای مدیریت و کارهای حساب‌های تلگرام.</span>
+            </p>
+          </div>
+
+          <div class="item">
+            <h3>
+              <a href="https://github.com/alirezaprogrammermaker/tor-proxy-manager" target="_blank" rel="noopener">Tor Proxy Manager</a>
+            </h3>
+            <p class="meta">JavaScript · WSL · Web Panel</p>
+            <p>
+              <span data-i18n="en">Automated Tor proxy for Windows with web panel, kill switch, and VPN (TUN) mode.</span>
+              <span data-i18n="fa">پروکسی خودکار Tor برای ویندوز با پنل وب، kill switch و حالت VPN (TUN).</span>
+            </p>
+          </div>
+
+          <div class="item">
+            <h3>
+              <a href="https://github.com/alirezaprogrammermaker/telegrambotlearning" target="_blank" rel="noopener">Telegram Bot Learning</a>
+            </h3>
+            <p class="meta">PHP · YouTube Course</p>
+            <p>
+              <span data-i18n="en">Educational materials for building Telegram bots, paired with YouTube lessons.</span>
+              <span data-i18n="fa">محتوای آموزشی ساخت ربات تلگرام همراه با درس‌های یوتیوب.</span>
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="edu-title">
+          <h2 id="edu-title">
+            <span data-i18n="en">Education &amp; Learning</span>
+            <span data-i18n="fa">آموزش</span>
+          </h2>
+          <div class="item">
+            <h3>
+              <span data-i18n="en">Self-taught Software Development</span>
+              <span data-i18n="fa">برنامه‌نویسی خودآموز</span>
+            </h3>
+            <p>
+              <span data-i18n="en">Continuous practice through open-source projects, bot systems, and published tutorials.</span>
+              <span data-i18n="fa">یادگیری مداوم از طریق پروژه‌های متن‌باز، سیستم‌های ربات و آموزش‌های منتشرشده.</span>
+            </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="lang-title">
+          <h2 id="lang-title">
+            <span data-i18n="en">Languages</span>
+            <span data-i18n="fa">زبان‌ها</span>
+          </h2>
+          <div class="item">
+            <p>
+              <span data-i18n="en">Persian (Native) · English (Working proficiency)</span>
+              <span data-i18n="fa">فارسی (زبان مادری) · انگلیسی (سطح کاری)</span>
+            </p>
+          </div>
+        </section>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <span data-i18n="en">Simple bilingual resume · Switch language above</span>
+    <span data-i18n="fa">رزومه دوزبانه ساده · زبان را از بالا تغییر دهید</span>
+  </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var buttons = document.querySelectorAll(".lang-btn");
+      var titles = {
+        en: "Alireza Programmer — Resume",
+        fa: "علیرضا برنامه‌نویس — رزومه"
+      };
+
+      function setLang(lang) {
+        root.lang = lang;
+        root.dir = lang === "fa" ? "rtl" : "ltr";
+        document.title = titles[lang];
+        buttons.forEach(function (btn) {
+          var active = btn.getAttribute("data-lang") === lang;
+          btn.classList.toggle("active", active);
+          btn.setAttribute("aria-pressed", active ? "true" : "false");
+        });
+        try { localStorage.setItem("resume-lang", lang); } catch (e) {}
+      }
+
+      buttons.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setLang(btn.getAttribute("data-lang"));
+        });
+      });
+
+      var saved = null;
+      try { saved = localStorage.getItem("resume-lang"); } catch (e) {}
+      var preferFa = (navigator.language || "").toLowerCase().startsWith("fa");
+      setLang(saved === "fa" || saved === "en" ? saved : (preferFa ? "fa" : "en"));
+    })();
+  </script>
 </body>
 </html>
