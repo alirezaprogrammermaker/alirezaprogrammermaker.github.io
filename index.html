@@ -501,10 +501,15 @@
         });
       });
 
+      var params = new URLSearchParams(window.location.search);
+      var fromQuery = params.get("lang");
       var saved = null;
       try { saved = localStorage.getItem("resume-lang"); } catch (e) {}
       var preferFa = (navigator.language || "").toLowerCase().startsWith("fa");
-      setLang(saved === "fa" || saved === "en" ? saved : (preferFa ? "fa" : "en"));
+      var initial = (fromQuery === "fa" || fromQuery === "en")
+        ? fromQuery
+        : (saved === "fa" || saved === "en" ? saved : (preferFa ? "fa" : "en"));
+      setLang(initial);
     })();
   </script>
 </body>
