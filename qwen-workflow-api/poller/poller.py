@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import socket
 import subprocess
 import sys
@@ -64,12 +65,18 @@ def _extract_content(stdout: str, stderr: str) -> str:
         "╭", "╰", "│", "Account:", "Session:", "Browser:", "Model:",
         "Sending...", "Navigating", "Waiting", "Mode:", "Think",
         "New chat", "Uploaded:", "Saved:", "Session active",
-        "Not logged", "Already logged", "Login",
+        "Not logged", "Already logged", "Login", "CHAT_ID:",
     )
+    skip_exact = {
+        "Create Video", "Edit", "Create Image", "Share", "Copy",
+        "Regenerate", "Retry", "Retry...", "Skip",
+    }
     lines = []
     for ln in (stdout or "").splitlines():
         s = ln.strip()
         if not s:
+            continue
+        if s in skip_exact:
             continue
         if any(s.startswith(p) for p in skip_prefixes):
             continue
@@ -79,7 +86,29 @@ def _extract_content(stdout: str, stderr: str) -> str:
     if lines:
         return "\n".join(lines[-40:])
     blob = ((stdout or "") + "\n" + (stderr or "")).strip()
-    return blob[-2000:]
+    # Never treat CHAT_ID machine lines as assistant content.
+    cleaned = "\n".join(
+        ln for ln in blob.splitlines() if not ln.strip().startswith("CHAT_ID:")
+    )
+    return cleaned[-2000:]
+
+
+def _extract_qwen_chat_id(stderr: str, stdout: str = "") -> str | None:
+    for ln in ((stderr or "") + "\n" + (stdout or "")).splitlines():
+        s = ln.strip()
+        if s.startswith("CHAT_ID:"):
+            cid = s.split(":", 1)[1].strip()
+            if cid and re.fullmatch(r"[0-9a-fA-F-]{16,}", cid) and cid.lower() not in {"guest", "new"}:
+                return cid
+    return None
+
+
+def _valid_qwen_chat_id(cid: object) -> bool:
+    return (
+        isinstance(cid, str)
+        and bool(re.fullmatch(r"[0-9a-fA-F-]{16,}", cid))
+        and cid.lower() not in {"guest", "new"}
+    )
 
 
 def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
@@ -112,8 +141,9 @@ def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
     )
 
     args = [sys.executable, str(cli), "chat", "-a", name, "--headless", "--raw"]
-    if job.get("qwen_chat_id"):
-        args += ["--chat-id", job["qwen_chat_id"]]
+    existing_cid = job.get("qwen_chat_id")
+    if _valid_qwen_chat_id(existing_cid):
+        args += ["--chat-id", existing_cid]
     else:
         args += ["-n"]
     if mode and mode != "chat":
@@ -136,10 +166,17 @@ def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
         timeout=int(os.environ.get("JOB_TIMEOUT", "600")),
     )
     content = _extract_content(proc.stdout or "", proc.stderr or "")
+    qwen_chat_id = _extract_qwen_chat_id(proc.stderr or "", proc.stdout or "")
+    if not qwen_chat_id and _valid_qwen_chat_id(job.get("qwen_chat_id")):
+        qwen_chat_id = job.get("qwen_chat_id")
     result: dict = {"content": content, "exit_code": proc.returncode}
     if out_dir:
         files = sorted(Path(out_dir).glob("*"))
         key = "images" if kind == "image" else "videos"
+        if kind == "image":
+            files = [f for f in files if f.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".gif"}]
+        else:
+            files = [f for f in files if f.suffix.lower() in {".mp4", ".webm", ".mov", ".mkv"}]
         result[key] = [str(f) for f in files]
         # If CLI saved media but stdout was noisy, still treat as success when files exist.
         if files and proc.returncode == 0 and not content:
@@ -150,13 +187,21 @@ def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
     if kind in ("image", "video"):
         media = result.get("images") or result.get("videos")
         ok = proc.returncode == 0 and bool(media)
+    # Guard against Rich status lines / soft timeouts being treated as success.
+    low = (content or "").lower()
+    if ok and (
+        "response timeout" in low
+        or low.startswith("[timeout")
+        or "error on step" in low
+    ):
+        ok = False
 
     return {
         "status": "succeeded" if ok else "failed",
         "result": result,
-        "error": None if ok else f"cli exit {proc.returncode}",
+        "error": None if ok else (f"cli exit {proc.returncode}" if proc.returncode else content[:240]),
         "assistant_content": content if ok else None,
-        "qwen_chat_id": job.get("qwen_chat_id"),
+        "qwen_chat_id": qwen_chat_id,
     }
 
 

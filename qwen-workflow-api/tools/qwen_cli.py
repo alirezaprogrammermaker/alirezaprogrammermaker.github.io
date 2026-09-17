@@ -235,6 +235,8 @@ class QwenClient:
         # Why the last login() call failed — "auth_page" (bad credentials),
         # "network: ..." or "error: ...". Used by the verify command.
         self.last_login_error: Optional[str] = None
+        # Real upstream chat UUID (URL often stays /c/guest; API carries chat_id).
+        self._last_chat_id: str = ""
 
     async def __aenter__(self):
         await self.start()
@@ -244,6 +246,28 @@ class QwenClient:
         await self.close()
 
     # ── Lifecycle ──────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _looks_like_chat_id(cid: str) -> bool:
+        return bool(
+            cid
+            and re.fullmatch(r"[0-9a-fA-F-]{16,}", cid)
+            and cid.lower() not in {"guest", "new"}
+        )
+
+    def _remember_chat_id(self, cid: str) -> None:
+        if self._looks_like_chat_id(cid):
+            self._last_chat_id = cid
+
+    def _on_network_response(self, response) -> None:
+        """Capture chat_id from Qwen API traffic (URL bar may stay /c/guest)."""
+        try:
+            url = response.url or ""
+            m = re.search(r"[?&]chat_id=([0-9a-fA-F-]{16,})", url)
+            if m:
+                self._remember_chat_id(m.group(1))
+        except Exception:
+            pass
 
     async def start(self):
         ensure_dirs()
@@ -265,6 +289,7 @@ class QwenClient:
         pages = self.context.pages
         self.page = pages[0] if pages else await self.context.new_page()
         self.page.set_default_timeout(DEFAULT_TIMEOUT)
+        self.page.on("response", self._on_network_response)
 
     async def close(self):
         if self.context:
@@ -715,6 +740,10 @@ class QwenClient:
                 document.querySelectorAll('[id*=splash]').forEach(el => {
                     try { el.remove(); } catch (e) {}
                 });
+                // Skeleton overlays can block the composer after /c/<id> navigation.
+                document.querySelectorAll('.chat-detail-skeleton').forEach(el => {
+                    try { el.remove(); } catch (e) {}
+                });
                 // "Which response do you prefer?" / studio feedback overlays
                 const blockers = Array.from(document.querySelectorAll('button, [role=button]'));
                 for (const b of blockers) {
@@ -724,6 +753,12 @@ class QwenClient:
                     }
                 }
             }""")
+        except Exception:
+            pass
+        try:
+            await self.page.wait_for_selector(
+                ".chat-detail-skeleton", state="hidden", timeout=8000
+            )
         except Exception:
             pass
         for _ in range(3):
@@ -846,28 +881,51 @@ class QwenClient:
             console.print(f"  [yellow]Could not open chat: {e}[/yellow]")
 
     async def get_current_chat_id(self) -> str:
-        """Get the chat ID from the current URL (e.g. /c/abc123 -> abc123)."""
+        """Get the upstream chat UUID.
+
+        Prefer network-captured chat_id (completions?chat_id=...), then URL /c/<uuid>.
+        Ignores placeholder segments like /c/guest.
+        """
+        if self._looks_like_chat_id(self._last_chat_id):
+            return self._last_chat_id
         try:
             url = self.page.url
-            # Match /c/<uuid> pattern
             m = url.split('/c/')
             if len(m) > 1:
-                return m[1].split('/')[0].split('?')[0]
+                cid = m[1].split('/')[0].split('?')[0].strip()
+                if self._looks_like_chat_id(cid):
+                    self._last_chat_id = cid
+                    return cid
             return ''
         except Exception:
             return ''
 
+    async def wait_for_chat_id(self, timeout_ms: int = 8000) -> str:
+        """Poll until a real chat UUID appears (network capture or URL)."""
+        deadline = time.time() + (timeout_ms / 1000)
+        while time.time() < deadline:
+            cid = await self.get_current_chat_id()
+            if cid:
+                return cid
+            await self.page.wait_for_timeout(250)
+        return await self.get_current_chat_id()
+
     async def open_chat_by_id(self, chat_id: str):
         """Open a specific chat by its ID (navigates to /c/<id>)."""
+        if not self._looks_like_chat_id(chat_id):
+            console.print(f"  [yellow]Invalid chat id: {chat_id!r}[/yellow]")
+            return
         try:
             url = f"{QWEN_CHAT_URL}c/{chat_id}"
             console.print(f"  [dim]Navigating to /c/{chat_id}...[/dim]")
             await self.page.goto(url, wait_until="domcontentloaded", timeout=DEFAULT_TIMEOUT)
+            await self._dismiss_popups()
             try:
                 await self.page.wait_for_selector("textarea.message-input-textarea", timeout=10000)
                 console.print("  [green]Chat opened.[/green]")
             except PlaywrightTimeout:
                 console.print("  [yellow]Page loaded but textarea not found.[/yellow]")
+            self._remember_chat_id(chat_id)
         except Exception as e:
             console.print(f"  [yellow]Could not open chat: {e}[/yellow]")
 
@@ -908,7 +966,11 @@ class QwenClient:
             raise RuntimeError("Chat input not found")
 
         await self._dismiss_popups()
-        await textarea.click()
+        try:
+            await textarea.click(timeout=5000)
+        except Exception:
+            await self._dismiss_popups()
+            await textarea.click(timeout=5000, force=True)
         await self.page.wait_for_timeout(PRE_SEND_WAIT)
         await textarea.fill(message)
         await self.page.wait_for_timeout(PRE_SEND_WAIT)
@@ -925,8 +987,13 @@ class QwenClient:
         if not sent:
             console.print("  [yellow]Retry...[/yellow]")
             await self.page.reload(wait_until="domcontentloaded")
+            await self._dismiss_popups()
             textarea = await self.page.wait_for_selector("textarea.message-input-textarea", timeout=10000)
-            await textarea.click()
+            try:
+                await textarea.click(timeout=5000)
+            except Exception:
+                await self._dismiss_popups()
+                await textarea.click(timeout=5000, force=True)
             await self.page.wait_for_timeout(PRE_SEND_WAIT)
             await textarea.fill(message)
             await self.page.wait_for_timeout(PRE_SEND_WAIT)
@@ -1028,6 +1095,8 @@ class QwenClient:
             text = await self._extract_response_text(messages[-1])
             if text:
                 return text
+        if console_printed_timeout:
+            raise TimeoutError("Response timeout: no assistant message received")
         return "[Timeout: No response received]"
 
     async def _dismiss_feedback(self):
@@ -1151,6 +1220,58 @@ class QwenClient:
                 console.print("  [yellow]No downloadable images (blob/data URLs).[/yellow]")
         except Exception as e:
             console.print(f"  [yellow]Download error: {e}[/yellow]")
+        return saved
+
+    async def download_generated_videos(self, output_dir: str = ".") -> list:
+        """Download <video> sources from the last assistant message."""
+        saved = []
+        try:
+            messages = await self.page.query_selector_all(".qwen-chat-message-assistant")
+            if not messages:
+                return saved
+            deadline = time.time() + 90
+            videos = []
+            while time.time() < deadline:
+                videos = await messages[-1].query_selector_all("video, video source")
+                ready = []
+                for el in videos:
+                    try:
+                        src = await el.evaluate("el => el.currentSrc || el.src || el.getAttribute('src')")
+                    except Exception:
+                        src = await el.get_attribute("src")
+                    if src and src.startswith("http"):
+                        ready.append(src)
+                if ready:
+                    break
+                await self.page.wait_for_timeout(500)
+            if not ready:
+                console.print("  [yellow]No video sources in last response.[/yellow]")
+                return saved
+
+            out = Path(output_dir)
+            out.mkdir(parents=True, exist_ok=True)
+            for i, src in enumerate(dict.fromkeys(ready)):
+                try:
+                    resp = await self.context.request.get(src)
+                    if not resp.ok:
+                        console.print(f"  [yellow]Video {i+1}: HTTP {resp.status}[/yellow]")
+                        continue
+                    body = await resp.body()
+                    ctype = resp.headers.get("content-type", "")
+                    ext = "mp4"
+                    for e in ("webm", "mov", "mkv", "mp4"):
+                        if e in ctype or src.lower().endswith(f".{e}"):
+                            ext = e
+                            break
+                    fname = f"qwen_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i+1}.{ext}"
+                    fpath = out / fname
+                    fpath.write_bytes(body)
+                    saved.append(str(fpath))
+                    console.print(f"  [green]Saved: {fname}[/green]")
+                except Exception as e:
+                    console.print(f"  [yellow]Video {i+1} failed: {e}[/yellow]")
+        except Exception as e:
+            console.print(f"  [yellow]Video download error: {e}[/yellow]")
         return saved
 
     # ── Export ─────────────────────────────────────────────────────────────
@@ -1619,10 +1740,10 @@ async def _run_chat(
                     client._stop_requested = True
                     console.print("\n  [yellow]Stopping...[/yellow]")
                     await client.stop_generation()
-                    break
+                    sys.exit(130)
                 except Exception as e:
                     console.print(f"[red]Error on step {idx}: {e}[/red]")
-                    break
+                    sys.exit(1)
 
                 if raw:
                     console.print(response)
@@ -1633,10 +1754,19 @@ async def _run_chat(
 
                 if download_dir:
                     await client.download_generated_images(download_dir)
+                    await client.download_generated_videos(download_dir)
 
                 if idx < total and wait_between > 0:
                     console.print(f"  [dim]Waiting {wait_between}s...[/dim]")
                     await client.page.wait_for_timeout(wait_between * 1000)
+
+            # Machine-readable chat id for pollers (stderr keeps --raw stdout clean).
+            try:
+                cid = await client.wait_for_chat_id()
+                if cid:
+                    print(f"CHAT_ID:{cid}", file=sys.stderr, flush=True)
+            except Exception:
+                pass
 
             if export_path:
                 await client.export_chat(export_path)
@@ -1776,6 +1906,7 @@ async def _run_chat(
                     console.print()
                 if download_dir:
                     await client.download_generated_images(download_dir)
+                    await client.download_generated_videos(download_dir)
             except KeyboardInterrupt:
                 client._stop_requested = True
                 console.print("\n  [yellow]Stopping...[/yellow]")
