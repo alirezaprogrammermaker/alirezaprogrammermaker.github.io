@@ -258,7 +258,30 @@ def main() -> int:
             job = payload["job"]
             account = payload["account"]
             print(f"claimed {job['id']} kind={job['kind']}", flush=True)
-            outcome = run_job(cli, config_dir, account, job)
+            try:
+                outcome = run_job(cli, config_dir, account, job)
+            except subprocess.TimeoutExpired as e:
+                print(f"job timeout {job['id']}: {e}", flush=True)
+                outcome = {
+                    "status": "failed",
+                    "result": {"content": f"job timeout after {e.timeout}s"},
+                    "error": f"job timeout after {e.timeout}s",
+                    "assistant_content": None,
+                    "qwen_chat_id": job.get("qwen_chat_id")
+                    if _valid_qwen_chat_id(job.get("qwen_chat_id"))
+                    else None,
+                }
+            except Exception as e:
+                print(f"job error {job['id']}: {e}", flush=True)
+                outcome = {
+                    "status": "failed",
+                    "result": {"content": str(e)[:500]},
+                    "error": str(e)[:500],
+                    "assistant_content": None,
+                    "qwen_chat_id": job.get("qwen_chat_id")
+                    if _valid_qwen_chat_id(job.get("qwen_chat_id"))
+                    else None,
+                }
             _req("POST", f"{base}/v1/worker/jobs/{job['id']}/complete", key, outcome)
             completed += 1
             print(
