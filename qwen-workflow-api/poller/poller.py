@@ -2,12 +2,16 @@
 """GitHub Actions / local poller — claims jobs and runs qwen_cli.py.
 
 Env:
-  BRIDGE_URL      e.g. https://qwen-workflow-api.<subdomain>.workers.dev
-  WORKER_KEY      Worker bearer token
-  QWEN_CLI_PATH   path to qwen_cli.py
-  QWEN_CLI_CONFIG_DIR  optional
-  POLL_SECONDS    default 8 (keep low request volume)
-  WORKER_ID       default hostname
+  BRIDGE_URL           Control-plane base URL (required)
+  WORKER_KEY           Worker bearer token (required)
+  QWEN_CLI_PATH        path to qwen_cli.py
+  QWEN_CLI_CONFIG_DIR  browser profile / accounts dir
+  POLL_SECONDS         default 8 (keep ≥5 for free-tier quotas)
+  WORKER_ID            default hostname
+  MAX_JOBS             stop after N completed jobs (0 = unlimited)
+  RUN_SECONDS          stop after N seconds (0 = unlimited) — use ~21000 for 6h GHA
+  IDLE_EXITS           consecutive empty claims before exit (0 = never)
+  JOB_TIMEOUT          per-job CLI timeout seconds (default 600)
 """
 
 from __future__ import annotations
@@ -23,6 +27,12 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+# workers.dev / WAF may reject the default Python-urllib User-Agent with 403.
+USER_AGENT = os.environ.get(
+    "BRIDGE_USER_AGENT",
+    "Mozilla/5.0 (compatible; QwenWorkflowPoller/1.0; +https://github.com/)",
+)
+
 
 def _req(method: str, url: str, key: str, body: dict | None = None):
     data = None if body is None else json.dumps(body).encode()
@@ -34,6 +44,7 @@ def _req(method: str, url: str, key: str, body: dict | None = None):
             "Authorization": f"Bearer {key}",
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "User-Agent": USER_AGENT,
         },
     )
     try:
@@ -47,20 +58,59 @@ def _req(method: str, url: str, key: str, body: dict | None = None):
         raise RuntimeError(f"HTTP {e.code}: {raw}") from e
 
 
+def _extract_content(stdout: str, stderr: str) -> str:
+    """Prefer --raw assistant text; skip Rich chrome / CLI status lines."""
+    skip_prefixes = (
+        "╭", "╰", "│", "Account:", "Session:", "Browser:", "Model:",
+        "Sending...", "Navigating", "Waiting", "Mode:", "Think",
+        "New chat", "Uploaded:", "Saved:", "Session active",
+        "Not logged", "Already logged", "Login",
+    )
+    lines = []
+    for ln in (stdout or "").splitlines():
+        s = ln.strip()
+        if not s:
+            continue
+        if any(s.startswith(p) for p in skip_prefixes):
+            continue
+        if s.startswith("[") and s.endswith("]"):
+            continue
+        lines.append(s)
+    if lines:
+        return "\n".join(lines[-40:])
+    blob = ((stdout or "") + "\n" + (stderr or "")).strip()
+    return blob[-2000:]
+
+
 def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
     kind = job["kind"]
     req = job.get("request") or {}
     prompt = req.get("prompt") or ""
-    mode = req.get("mode") or ("image" if kind == "image" else "video" if kind == "video" else None)
+    mode = req.get("mode") or (
+        "image" if kind == "image" else "video" if kind == "video" else None
+    )
     name = account["name"]
-    # Ensure account present for CLI
+    env = {**os.environ, "QWEN_CLI_CONFIG_DIR": str(config_dir)}
+
     subprocess.run(
-        [sys.executable, str(cli), "add", "-e", account["email"], "-p", account["password"], "-n", name, "-y"],
+        [
+            sys.executable,
+            str(cli),
+            "add",
+            "-e",
+            account["email"],
+            "-p",
+            account["password"],
+            "-n",
+            name,
+            "-y",
+        ],
         check=False,
-        env={**os.environ, "QWEN_CLI_CONFIG_DIR": str(config_dir)},
+        env=env,
         capture_output=True,
         text=True,
     )
+
     args = [sys.executable, str(cli), "chat", "-a", name, "--headless", "--raw"]
     if job.get("qwen_chat_id"):
         args += ["--chat-id", job["qwen_chat_id"]]
@@ -72,26 +122,35 @@ def run_job(cli: Path, config_dir: Path, account: dict, job: dict) -> dict:
     if think:
         args += ["-t", think]
     args += ["-p", prompt]
+
     out_dir = None
     if kind in ("image", "video"):
         out_dir = tempfile.mkdtemp(prefix="qwen-out-")
         args += ["-d", out_dir]
+
     proc = subprocess.run(
         args,
-        env={**os.environ, "QWEN_CLI_CONFIG_DIR": str(config_dir)},
+        env=env,
         capture_output=True,
         text=True,
         timeout=int(os.environ.get("JOB_TIMEOUT", "600")),
     )
-    text = (proc.stdout or "") + "\n" + (proc.stderr or "")
-    # Best-effort: last non-empty line as content for text
-    lines = [ln for ln in (proc.stdout or "").splitlines() if ln.strip()]
-    content = lines[-1] if lines else text[-2000:]
-    result = {"content": content, "exit_code": proc.returncode}
+    content = _extract_content(proc.stdout or "", proc.stderr or "")
+    result: dict = {"content": content, "exit_code": proc.returncode}
     if out_dir:
-        files = list(Path(out_dir).glob("*"))
-        result["images" if kind == "image" else "videos"] = [str(f) for f in files]
+        files = sorted(Path(out_dir).glob("*"))
+        key = "images" if kind == "image" else "videos"
+        result[key] = [str(f) for f in files]
+        # If CLI saved media but stdout was noisy, still treat as success when files exist.
+        if files and proc.returncode == 0 and not content:
+            content = f"[{key} saved: {len(files)}]"
+            result["content"] = content
+
     ok = proc.returncode == 0
+    if kind in ("image", "video"):
+        media = result.get("images") or result.get("videos")
+        ok = proc.returncode == 0 and bool(media)
+
     return {
         "status": "succeeded" if ok else "failed",
         "result": result,
@@ -105,26 +164,67 @@ def main() -> int:
     base = os.environ["BRIDGE_URL"].rstrip("/")
     key = os.environ["WORKER_KEY"]
     cli = Path(os.environ.get("QWEN_CLI_PATH", "qwen_cli.py"))
-    config_dir = Path(os.environ.get("QWEN_CLI_CONFIG_DIR", tempfile.mkdtemp(prefix="qwen-cfg-")))
+    if not cli.is_file():
+        print(f"QWEN_CLI_PATH not found: {cli}", flush=True)
+        return 2
+
+    config_dir = Path(
+        os.environ.get("QWEN_CLI_CONFIG_DIR", tempfile.mkdtemp(prefix="qwen-cfg-"))
+    )
     config_dir.mkdir(parents=True, exist_ok=True)
+
     poll = int(os.environ.get("POLL_SECONDS", "8"))
     worker_id = os.environ.get("WORKER_ID") or socket.gethostname()
-    print(f"poller start worker_id={worker_id} poll={poll}s", flush=True)
+    max_jobs = int(os.environ.get("MAX_JOBS", "0"))
+    run_seconds = int(os.environ.get("RUN_SECONDS", "0"))
+    idle_exits = int(os.environ.get("IDLE_EXITS", "0"))
+
+    started = time.time()
+    completed = 0
+    idle_streak = 0
+
+    print(
+        f"poller start worker_id={worker_id} poll={poll}s "
+        f"max_jobs={max_jobs} run_seconds={run_seconds} idle_exits={idle_exits}",
+        flush=True,
+    )
+
     while True:
+        if run_seconds and (time.time() - started) >= run_seconds:
+            print("run_seconds reached; exiting", flush=True)
+            break
+        if max_jobs and completed >= max_jobs:
+            print("max_jobs reached; exiting", flush=True)
+            break
+
         try:
-            status, payload = _req("POST", f"{base}/v1/worker/claim", key, {"worker_id": worker_id})
+            status, payload = _req(
+                "POST", f"{base}/v1/worker/claim", key, {"worker_id": worker_id}
+            )
             if status == 204 or not payload:
+                idle_streak += 1
+                if idle_exits and idle_streak >= idle_exits:
+                    print("idle_exits reached; exiting", flush=True)
+                    break
                 time.sleep(poll)
                 continue
+
+            idle_streak = 0
             job = payload["job"]
             account = payload["account"]
             print(f"claimed {job['id']} kind={job['kind']}", flush=True)
             outcome = run_job(cli, config_dir, account, job)
             _req("POST", f"{base}/v1/worker/jobs/{job['id']}/complete", key, outcome)
-            print(f"completed {job['id']} status={outcome['status']}", flush=True)
+            completed += 1
+            print(
+                f"completed {job['id']} status={outcome['status']} done={completed}",
+                flush=True,
+            )
         except Exception as e:
             print(f"poller error: {e}", flush=True)
             time.sleep(poll)
+
+    print(f"poller exit completed_jobs={completed}", flush=True)
     return 0
 
 
