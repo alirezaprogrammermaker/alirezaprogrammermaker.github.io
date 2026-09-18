@@ -17,6 +17,29 @@ from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
 
+_SOCKS_WARNING_EMITTED = False
+
+
+def socks_proxy_supported() -> bool:
+    """httpx needs socksio to speak SOCKS5 used by local Xray probes."""
+    try:
+        import socksio  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
+
+def _warn_missing_socksio_once() -> None:
+    global _SOCKS_WARNING_EMITTED
+    if _SOCKS_WARNING_EMITTED:
+        return
+    _SOCKS_WARNING_EMITTED = True
+    logger.error(
+        "socksio is not installed — httpx cannot use SOCKS5 proxies; "
+        "all Xray/SOCKS live probes will fail. Install with: pip install 'httpx[socks]' socksio"
+    )
+
 
 def score_latency(latency_ms: float, settings: dict[str, Any]) -> float:
     t = settings.get("testing") or {}
@@ -230,6 +253,11 @@ class XrayProbe:
                 if resp.status_code >= 500:
                     return None
             return (time.monotonic() - t0) * 1000
+        except ImportError as exc:
+            # Missing socksio surfaces as ImportError from httpx SOCKS transport
+            _warn_missing_socksio_once()
+            logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
+            return None
         except Exception as exc:
             logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
             return None
@@ -277,6 +305,8 @@ class LiveTester:
             logger.info("live test mode=xray binary=%s accept_tcp_only=%s", self.xray.xray_bin, self.accept_tcp_only)
         else:
             logger.info("live test mode=tcp/tls (xray unavailable or disabled)")
+        if not socks_proxy_supported():
+            _warn_missing_socksio_once()
 
     def _httpx_proxy_probe(self, cfg: ProxyConfig) -> float | None:
         """Probe socks/http proxies by fetching probe_url through them."""
@@ -295,6 +325,9 @@ class LiveTester:
                 if resp.status_code >= 500:
                     return None
             return (time.monotonic() - t0) * 1000
+        except ImportError:
+            _warn_missing_socksio_once()
+            return None
         except Exception as exc:
             logger.debug("httpx proxy probe fail fp=%s err=%s", cfg.fingerprint, type(exc).__name__)
             return None

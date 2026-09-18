@@ -178,3 +178,9 @@ def test_no_tcp_fake_alive_for_hysteria_when_xray_mode():
     out = tester.test_one(cfg)
     assert out.alive is False
 
+
+def test_socks_proxy_supported_detects_socksio():
+    from v2agg.test import live as live_mod
+
+    assert live_mod.socks_proxy_supported() is True
+
