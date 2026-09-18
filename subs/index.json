@@ -1,10 +1,16 @@
 {
-  "count_all": 12,
-  "count_best": 11,
+  "count_all": 17,
+  "count_best": 16,
   "files": {
     "all": "all.txt",
     "all_base64": "all.base64",
     "best": "best.txt",
     "best_base64": "best.base64"
+  },
+  "urls": {
+    "all": "https://alirezaprogrammermaker.github.io/subs/all.txt",
+    "all_base64": "https://alirezaprogrammermaker.github.io/subs/all.base64",
+    "best": "https://alirezaprogrammermaker.github.io/subs/best.txt",
+    "best_base64": "https://alirezaprogrammermaker.github.io/subs/best.base64"
   }
 }
