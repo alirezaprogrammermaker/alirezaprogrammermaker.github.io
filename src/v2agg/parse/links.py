@@ -6,32 +6,13 @@ import re
 from typing import Callable
 from urllib.parse import parse_qs, unquote, urlparse
 
-from v2agg.models import ALLOWED_SCHEMES, ProxyConfig, is_valid_host
+from v2agg.models import ProxyConfig, is_valid_host
 from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
 
-# Share-link schemes commonly used by V2Ray/Xray/sing-box clients
-_KNOWN_SCHEMES = set(ALLOWED_SCHEMES) | {
-    "hysteria",
-    "tuic",
-    "wireguard",
-    "wg",
-    "socks",
-    "socks5",
-    "http",
-    "https",
-    "juicity",
-    "anytls",
-    "brook",
-    "naive",
-    "mieru",
-}
-
 _SCHEME_RE = re.compile(
-    r"(?P<link>(?:"
-    + "|".join(sorted(_KNOWN_SCHEMES, key=len, reverse=True))
-    + r")://[^\s<>\"']+)",
+    r"(?P<link>(?:vmess|vless|trojan|ss|ssr|hysteria2|hy2)://[^\s<>\"']+)",
     re.IGNORECASE,
 )
 
@@ -46,11 +27,17 @@ def extract_links(text: str) -> list[str]:
     # Also accept one-link-per-line without regex false negatives
     for line in text.splitlines():
         line = line.strip()
-        if "://" not in line:
-            continue
-        scheme = line.lower().split("://", 1)[0]
-        if scheme in _KNOWN_SCHEMES and line not in found:
-            found.append(line)
+        if "://" in line and line.lower().split("://", 1)[0] in {
+            "vmess",
+            "vless",
+            "trojan",
+            "ss",
+            "ssr",
+            "hysteria2",
+            "hy2",
+        }:
+            if line not in found:
+                found.append(line)
     return found
 
 
@@ -97,37 +84,17 @@ def parse_vmess(link: str) -> ProxyConfig | None:
     return cfg
 
 
-def _normalize_scheme(scheme: str) -> str:
-    s = scheme.lower()
-    if s == "hy2":
-        return "hysteria2"
-    if s == "wg":
-        return "wireguard"
-    if s == "socks5":
-        return "socks"
-    if s == "https":
-        return "http"
-    return s
-
-
 def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
-    """Parse URI-style share links (vless/trojan/ss/hysteria2/tuic/…)."""
+    """Parse vless/trojan/ss/hysteria2 style URIs."""
     try:
         parsed = urlparse(link)
     except Exception:
         return None
-
-    raw_scheme = parsed.scheme.lower()
-    want = scheme.lower()
-    aliases = {
-        "hysteria2": {"hysteria2", "hy2"},
-        "wireguard": {"wireguard", "wg"},
-        "socks": {"socks", "socks5"},
-        "http": {"http", "https"},
-    }
-    allowed = aliases.get(want, {want})
-    if raw_scheme not in allowed and raw_scheme != want:
-        return None
+    if parsed.scheme.lower() not in {scheme, "hy2"} and scheme != parsed.scheme.lower():
+        # allow hy2 alias for hysteria2
+        if not (scheme == "hysteria2" and parsed.scheme.lower() == "hy2"):
+            if parsed.scheme.lower() != scheme:
+                return None
 
     host = parsed.hostname or ""
     port = parsed.port or 0
@@ -136,9 +103,10 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
     remark = unquote(parsed.fragment or "")
     qs = {k: v[0] if v else "" for k, v in parse_qs(parsed.query).items()}
 
-    if want == "ss":
+    if scheme == "ss":
         # ss://METHOD:PASSWORD@host:port or ss://base64@host:port
         if not user and parsed.netloc:
+            # ss://BASE64#remark
             b64part = link[5:].split("#", 1)[0]
             if "@" in b64part:
                 userinfo, hostport = b64part.rsplit("@", 1)
@@ -163,6 +131,7 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
                 try:
                     pad = (-len(b64part)) % 4
                     decoded = base64.b64decode(b64part + ("=" * pad)).decode("utf-8", errors="ignore")
+                    # method:pass@host:port
                     if "@" in decoded:
                         userinfo, hostport = decoded.rsplit("@", 1)
                         if ":" in userinfo:
@@ -175,45 +144,13 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
                     return None
         else:
             password = password or user
+            user = user  # method may be in username for METHOD:PASS form via user:pass
 
-    # Default ports for schemes that often omit them
-    if not port:
-        defaults = {
-            "http": 80 if raw_scheme == "http" else 443,
-            "socks": 1080,
-            "hysteria": 443,
-            "hysteria2": 443,
-            "tuic": 443,
-            "wireguard": 51820,
-            "juicity": 443,
-            "anytls": 443,
-            "naive": 443,
-        }
-        port = defaults.get(want, 0)
-
-    uuid_or_password = user if want in {
-        "vless",
-        "trojan",
-        "hysteria2",
-        "hysteria",
-        "tuic",
-        "juicity",
-        "anytls",
-        "brook",
-        "mieru",
-    } else (password or user)
-
-    if want == "trojan":
+    uuid_or_password = user if scheme in {"vless", "trojan", "hysteria2", "hy2"} else (password or user)
+    if scheme == "trojan":
         uuid_or_password = user or password
-    if want == "ss":
+    if scheme == "ss":
         uuid_or_password = f"{user}:{password}" if user and password else (password or user)
-    if want in {"socks", "http", "naive"}:
-        uuid_or_password = f"{user}:{password}" if user or password else ""
-    if want == "tuic":
-        # tuic://uuid:password@host:port
-        uuid_or_password = f"{user}:{password}" if password else user
-    if want == "wireguard":
-        uuid_or_password = user or qs.get("private_key") or qs.get("privateKey") or ""
 
     if not host or not port:
         return None
@@ -223,16 +160,7 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
     sni = qs.get("sni") or qs.get("peer") or qs.get("host") or ""
     path = qs.get("path") or ""
 
-    normalized_scheme = _normalize_scheme(want if want != "hy2" else "hysteria2")
-    if want in {"hy2", "hysteria2"}:
-        normalized_scheme = "hysteria2"
-    if want in {"wg", "wireguard"}:
-        normalized_scheme = "wireguard"
-    if want in {"socks", "socks5"}:
-        normalized_scheme = "socks"
-    if want in {"http", "https"}:
-        normalized_scheme = "http"
-
+    normalized_scheme = "hysteria2" if scheme in {"hysteria2", "hy2"} else scheme
     cfg = ProxyConfig(
         scheme=normalized_scheme,
         raw=link.strip(),
@@ -244,11 +172,7 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
         security=security,
         sni=sni,
         path=path,
-        extra={
-            k: v
-            for k, v in qs.items()
-            if k not in {"type", "network", "security", "tls", "sni", "peer", "host", "path"}
-        },
+        extra={k: v for k, v in qs.items() if k not in {"type", "network", "security", "tls", "sni", "peer", "host", "path"}},
     )
     cfg.ensure_fingerprint()
     return cfg
@@ -262,19 +186,6 @@ _PARSERS: dict[str, Callable[[str], ProxyConfig | None]] = {
     "ssr": lambda l: parse_uri_style(l, "ssr"),
     "hysteria2": lambda l: parse_uri_style(l, "hysteria2"),
     "hy2": lambda l: parse_uri_style(l, "hysteria2"),
-    "hysteria": lambda l: parse_uri_style(l, "hysteria"),
-    "tuic": lambda l: parse_uri_style(l, "tuic"),
-    "wireguard": lambda l: parse_uri_style(l, "wireguard"),
-    "wg": lambda l: parse_uri_style(l, "wireguard"),
-    "socks": lambda l: parse_uri_style(l, "socks"),
-    "socks5": lambda l: parse_uri_style(l, "socks"),
-    "http": lambda l: parse_uri_style(l, "http"),
-    "https": lambda l: parse_uri_style(l, "http"),
-    "juicity": lambda l: parse_uri_style(l, "juicity"),
-    "anytls": lambda l: parse_uri_style(l, "anytls"),
-    "brook": lambda l: parse_uri_style(l, "brook"),
-    "naive": lambda l: parse_uri_style(l, "naive"),
-    "mieru": lambda l: parse_uri_style(l, "mieru"),
 }
 
 

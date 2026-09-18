@@ -6,28 +6,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
-ALLOWED_SCHEMES = (
-    "vmess",
-    "vless",
-    "trojan",
-    "ss",
-    "ssr",
-    "hysteria2",
-    "hy2",
-    "hysteria",
-    "tuic",
-    "wireguard",
-    "wg",
-    "socks",
-    "socks5",
-    "http",
-    "https",
-    "juicity",
-    "anytls",
-    "brook",
-    "naive",
-    "mieru",
-)
+ALLOWED_SCHEMES = ("vmess", "vless", "trojan", "ss", "ssr", "hysteria2", "hy2")
 
 
 @dataclass
@@ -60,19 +39,13 @@ class ProxyConfig:
     def ensure_fingerprint(self) -> str:
         if self.fingerprint:
             return self.fingerprint
-        sec = (self.security or "").lower().strip()
-        if sec in {"", "none", "0", "false"}:
-            sec = ""
-        net = (self.network or "").lower().strip()
-        if net in {"", "none"}:
-            net = ""
         parts = [
             self.scheme.lower().strip(),
             self.host.lower().strip(),
             str(self.port),
             (self.uuid_or_password or "").strip(),
-            net,
-            sec,
+            (self.network or "").lower().strip(),
+            (self.security or "").lower().strip(),
             (self.sni or "").lower().strip(),
             (self.path or "").strip(),
         ]

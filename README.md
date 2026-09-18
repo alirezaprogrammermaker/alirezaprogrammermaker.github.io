@@ -14,12 +14,9 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Parses `vmess` / `vless` / `trojan` / `ss` / `hysteria2` (and related)
 - Dedup by outbound fingerprint; fail-count & max-age eviction
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback
-- Publishes to `subs/` for GitHub Pages (**sorted by lowest ping first**)
-- **Continuous ~6h live job**: discovery loop + **parallel health-watch every 2 minutes** (dead servers dropped & list republished immediately); cron every 5h starts the next job
-- Protocols: `vmess` `vless` `trojan` `ss` `ssr` `hysteria`/`hysteria2` `tuic` `wireguard` `socks` `http` `juicity` `anytls` `brook` `naive` `mieru`
+- Publishes to `subs/` for GitHub Pages
 - Telegram: best configs + nightly summary + channel description update
-- Channel description shows **Shamsi (Tehran) last activity** plus subscription URLs
-- State via cache/artifact across runs; `subs/` committed whenever the live list changes
+- Resumable runs for the ~6h public Actions limit (checkpoint via cache/artifact)
 - **Never** mentions sources or scrape methods in Telegram or public subscription files
 
 ### Fork & secrets
@@ -72,14 +69,14 @@ python -m v2agg --mode refresh --telegram-dry-run --print-metrics
 pytest -q
 ```
 
-### Continuous 6h + 2-min health watch
+### Cron & 6h resume
 
 | Workflow | Schedule (UTC) | Purpose |
 |----------|----------------|---------|
-| `refresh.yml` | every 5 hours | ~5h30m continuous run: discover + **parallel 2-min healthy re-check** → drop dead → push `subs/` |
-| `nightly.yml` | 00:30 | one-shot refresh + nightly Telegram summary |
+| `refresh.yml` | every 3 hours | collect → test → publish → Telegram best |
+| `nightly.yml` | 00:30 | refresh + nightly summary report |
 
-Each refresh job stays alive for `pipeline.max_runtime_sec` (~5h30m). A background thread re-probes **all** currently healthy servers every `health_watch_interval_sec` (120s) and immediately removes failures from the public list. The next cron is scheduled every 5h so it queues and starts as soon as the previous job ends — near-continuous coverage within Actions limits.
+`pipeline.max_runtime_sec` (~5h30m) stops testing before the runner hard limit, writes `state/checkpoint.json`, uploads artifact + cache. The **next** cron restores state and continues untested fingerprints, then publishes and clears the checkpoint. Only `subs/` is committed.
 
 ### Dry-run Telegram
 

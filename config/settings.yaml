@@ -2,29 +2,18 @@
 
 app:
   name: v2agg
-  # Public Pages origin (subscription links for Telegram description / index)
-  pages_base_url: "https://alirezaprogrammermaker.github.io"
-  # Short intro line for the Telegram channel description (links + Shamsi time appended in code)
-  channel_description: "کانفیگ‌های فعال V2Ray/Xray · تست خودکار"
+  # Public-facing channel description (no source / method mentions)
+  channel_description: "Active V2Ray/Xray configs · auto-tested · refreshed regularly"
 
 pipeline:
-  # Stay alive for nearly the full public Actions budget (~6h), then cron starts the next job.
-  continuous: true
-  max_runtime_sec: 19800  # 5h 30m (leave headroom before hard 6h kill)
-  # Parallel watchdog: re-probe EVERY healthy server this often and drop dead ones immediately
-  health_watch_interval_sec: 120
-  discovery_cycle_pause_sec: 10
-  # Push subs/ to GitHub Pages whenever the live list changes (during the long run)
-  git_publish: true
+  # Max wall time budget before writing checkpoint and exiting cleanly (seconds).
+  # GitHub Actions public runners ~6h; leave headroom for publish + Telegram.
+  max_runtime_sec: 19800  # 5h 30m
   checkpoint_interval_sec: 120
-  # Candidates tested per discovery cycle (watchdog runs in parallel)
-  max_configs_to_test_per_run: 1200
-  retest_healthy_first: true
-  max_healthy_publish: 300
+  max_configs_to_test_per_run: 800
+  max_healthy_publish: 200
   max_telegram_post_per_run: 15
   best_score_threshold: 40
-  # Drop if not reconfirmed (~15 min — real Xray probes are slower than TCP-open fakes)
-  healthy_max_age_hours: 0.25
 
 fetch:
   user_agent: "v2agg/1.0 (+https://github.com/alirezaprogrammermaker/alirezaprogrammermaker.github.io)"
@@ -33,7 +22,6 @@ fetch:
   backoff_max_sec: 20
   connect_timeout_sec: 15
   read_timeout_sec: 45
-  concurrency: 10
 
 validation:
   allowed_schemes:
@@ -44,22 +32,8 @@ validation:
     - ssr
     - hysteria2
     - hy2
-    - hysteria
-    - tuic
-    - wireguard
-    - wg
-    - socks
-    - socks5
-    - http
-    - https
-    - juicity
-    - anytls
-    - brook
-    - naive
-    - mieru
-  # Faster eviction of repeatedly dead nodes
-  max_fail_count: 2
-  max_age_hours: 24
+  max_fail_count: 5
+  max_age_hours: 72
   min_port: 1
   max_port: 65535
 
@@ -67,22 +41,16 @@ testing:
   # Prefer real proxy probe via Xray when binary is available.
   mode: auto  # auto | xray | tcp
   probe_url: https://www.cloudflare.com/cdn-cgi/trace
-  tcp_timeout_sec: 4
-  tls_timeout_sec: 7
-  xray_timeout_sec: 18
-  # Never treat "TCP port open" as a working proxy when Xray can probe (avoids garbage hy2/etc.)
-  accept_tcp_only: false
-  concurrency: 24
-  watch_concurrency: 16
+  tcp_timeout_sec: 5
+  tls_timeout_sec: 8
+  xray_timeout_sec: 20
+  concurrency: 16
   # Latency scoring (ms)
   score_latency_excellent_ms: 400
   score_latency_good_ms: 1200
   score_latency_ok_ms: 3000
   # Local SOCKS base port for xray probes (each worker + offset)
   local_socks_base_port: 21000
-  # Parallel health-watch uses a separate port range / workdir
-  watch_socks_base_port: 26000
-  watch_xray_workdir: state/runtime/xray-watch
   xray_bin: bin/xray
   xray_workdir: state/runtime/xray
 
@@ -96,9 +64,7 @@ publish:
   by_protocol_dir: by-protocol
   # Strip remarks that look like source attribution
   sanitize_remarks: true
-  # Remarks become ⚡{ping}ms-{n} so clients show lowest ping first visually too
   remark_prefix: "⚡"
-  sort_by: latency
 
 telegram:
   # Secrets come from env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID
@@ -108,12 +74,11 @@ telegram:
   post_best: true
   update_description: true
   dry_run: false
-  # Telegram channel description hard limit is 255 chars — keep intro short; code appends Shamsi + URLs
   message_template: |
-    ✅ کانفیگ فعال
-    پروتکل: {protocol}
-    پینگ: {latency_ms} ms
-    امتیاز: {score}
+    ✅ Active config
+    Protocol: {protocol}
+    Latency: {latency_ms} ms
+    Score: {score}
 
     `{link}`
 
