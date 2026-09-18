@@ -36,6 +36,7 @@ def test_checkpoint_roundtrip(tmp_path: Path):
 
 def test_publisher_no_source_in_output(tmp_path: Path):
     settings = {
+        "app": {"pages_base_url": "https://example.pages.test"},
         "publish": {
             "output_dir": str(tmp_path / "subs"),
             "all_file": "all.txt",
@@ -49,7 +50,7 @@ def test_publisher_no_source_in_output(tmp_path: Path):
         "pipeline": {"max_healthy_publish": 50, "best_score_threshold": 40},
     }
     pub = Publisher(settings)
-    cfg = ProxyConfig(
+    slow = ProxyConfig(
         scheme="vless",
         raw="vless://u@1.1.1.1:443?type=tcp#github-source-mirror",
         host="1.1.1.1",
@@ -58,12 +59,29 @@ def test_publisher_no_source_in_output(tmp_path: Path):
         remark="github-source-mirror",
         alive=True,
         score=90,
-        latency_ms=120,
+        latency_ms=800,
         source_id="secret-source",
     )
-    paths = pub.publish([cfg])
+    fast = ProxyConfig(
+        scheme="trojan",
+        raw="trojan://p@2.2.2.2:443?security=tls#node",
+        host="2.2.2.2",
+        port=443,
+        uuid_or_password="p",
+        remark="node",
+        alive=True,
+        score=70,
+        latency_ms=120,
+        source_id="secret-source-2",
+    )
+    paths = pub.publish([slow, fast])
     text = paths["all"].read_text(encoding="utf-8")
     assert "secret-source" not in text
     assert "github" not in text.lower()
+    # Lowest ping first
+    assert text.index("2.2.2.2") < text.index("1.1.1.1")
+    assert "120ms" in text
     index = json.loads(paths["index"].read_text(encoding="utf-8"))
-    assert index["count_all"] == 1
+    assert index["count_all"] == 2
+    assert index["sort"] == "latency_asc"
+

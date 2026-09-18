@@ -13,10 +13,14 @@ pipeline:
   max_runtime_sec: 19800  # 5h 30m
   checkpoint_interval_sec: 120
   # More sources → test a larger slice per run (remainder resumes next cron)
-  max_configs_to_test_per_run: 1500
+  max_configs_to_test_per_run: 1800
+  # Always re-test previously published healthy servers first each run
+  retest_healthy_first: true
   max_healthy_publish: 300
   max_telegram_post_per_run: 20
   best_score_threshold: 40
+  # Drop from public list if not reconfirmed alive within this window
+  healthy_max_age_hours: 4
 
 fetch:
   user_agent: "v2agg/1.0 (+https://github.com/alirezaprogrammermaker/alirezaprogrammermaker.github.io)"
@@ -35,8 +39,22 @@ validation:
     - ssr
     - hysteria2
     - hy2
-  max_fail_count: 5
-  max_age_hours: 72
+    - hysteria
+    - tuic
+    - wireguard
+    - wg
+    - socks
+    - socks5
+    - http
+    - https
+    - juicity
+    - anytls
+    - brook
+    - naive
+    - mieru
+  # Faster eviction of repeatedly dead nodes
+  max_fail_count: 2
+  max_age_hours: 24
   min_port: 1
   max_port: 65535
 
@@ -44,10 +62,10 @@ testing:
   # Prefer real proxy probe via Xray when binary is available.
   mode: auto  # auto | xray | tcp
   probe_url: https://www.cloudflare.com/cdn-cgi/trace
-  tcp_timeout_sec: 5
-  tls_timeout_sec: 8
-  xray_timeout_sec: 20
-  concurrency: 20
+  tcp_timeout_sec: 4
+  tls_timeout_sec: 7
+  xray_timeout_sec: 18
+  concurrency: 24
   # Latency scoring (ms)
   score_latency_excellent_ms: 400
   score_latency_good_ms: 1200
@@ -67,7 +85,9 @@ publish:
   by_protocol_dir: by-protocol
   # Strip remarks that look like source attribution
   sanitize_remarks: true
+  # Remarks become ⚡{ping}ms-{n} so clients show lowest ping first visually too
   remark_prefix: "⚡"
+  sort_by: latency
 
 telegram:
   # Secrets come from env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID
@@ -81,7 +101,7 @@ telegram:
   message_template: |
     ✅ کانفیگ فعال
     پروتکل: {protocol}
-    تأخیر: {latency_ms} ms
+    پینگ: {latency_ms} ms
     امتیاز: {score}
 
     `{link}`

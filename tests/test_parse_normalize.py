@@ -124,3 +124,24 @@ def test_score_latency():
 def test_invalid_port_rejected():
     link = "vless://u@host.example:0?type=tcp#x"
     assert parse_link(link) is None
+
+
+def test_parse_tuic_and_hysteria():
+    tuic = parse_link("tuic://11111111-2222-3333-4444-555555555555:pass@tuic.example:443?sni=tuic.example#t")
+    assert tuic is not None and tuic.scheme == "tuic" and tuic.port == 443
+    hy = parse_link("hysteria://pwd@hy.example:443?peer=hy.example#h")
+    assert hy is not None and hy.scheme == "hysteria"
+    socks = parse_link("socks5://user:pass@127.0.0.1:1080#s")
+    assert socks is not None and socks.scheme == "socks"
+
+
+def test_sort_by_latency():
+    from v2agg.util.ranking import sort_by_latency
+
+    a = ProxyConfig(scheme="vless", raw="vless://a@h:1", host="h", port=1, uuid_or_password="a", alive=True, latency_ms=500, score=80)
+    b = ProxyConfig(scheme="vless", raw="vless://b@h:2", host="h", port=2, uuid_or_password="b", alive=True, latency_ms=100, score=50)
+    a.ensure_fingerprint()
+    b.ensure_fingerprint()
+    ordered = sort_by_latency([a, b])
+    assert ordered[0].latency_ms == 100
+

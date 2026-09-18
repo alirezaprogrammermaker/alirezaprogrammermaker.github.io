@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Any
 
 from v2agg.models import ProxyConfig
-from v2agg.parse.normalize import rewrite_remark, sanitize_remark
+from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
+from v2agg.util.ranking import remark_with_latency, sort_by_latency
 
 logger = get_logger(__name__)
 
@@ -32,15 +33,20 @@ class Publisher:
     def _public_links(self, configs: list[ProxyConfig]) -> list[str]:
         links: list[str] = []
         for i, cfg in enumerate(configs, start=1):
-            remark = sanitize_remark(cfg.remark, self.remark_prefix, i) if self.sanitize else (cfg.remark or f"{self.remark_prefix}{i}")
+            if self.sanitize:
+                remark = remark_with_latency(cfg, self.remark_prefix, i)
+            else:
+                remark = cfg.remark or f"{self.remark_prefix}{i}"
             links.append(rewrite_remark(cfg.raw, remark))
         return links
 
     def publish(self, healthy: list[ProxyConfig]) -> dict[str, Path]:
         alive = [c for c in healthy if c.alive]
-        alive.sort(key=lambda c: (-c.score, c.latency_ms or 99999))
-        alive = alive[: self.max_healthy]
+        # Lowest ping first (user-facing list order)
+        alive = sort_by_latency(alive)[: self.max_healthy]
         best = [c for c in alive if c.score >= self.best_threshold][: max(20, self.max_healthy // 4)]
+        # best already latency-sorted as a subset of alive order; re-sort for safety
+        best = sort_by_latency(best)
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
         by_dir = self.output_dir / self.by_proto
@@ -59,7 +65,6 @@ class Publisher:
         paths["best_b64"] = self.output_dir / self.best_b64
         paths["best_b64"].write_text(encode_subscription_base64(best_links), encoding="utf-8")
 
-        # index for humans (no source mentions); include absolute Pages URLs when configured
         pages_base = self.pages_base_url
         files = {
             "all": self.all_file,
@@ -70,6 +75,7 @@ class Publisher:
         payload: dict[str, Any] = {
             "count_all": len(all_links),
             "count_best": len(best_links),
+            "sort": "latency_asc",
             "files": files,
         }
         if pages_base:
@@ -87,17 +93,18 @@ class Publisher:
         for c in alive:
             by_scheme[c.scheme].append(c)
         for scheme, items in by_scheme.items():
-            links = self._public_links(items)
+            ordered = sort_by_latency(items)
+            links = self._public_links(ordered)
             p = by_dir / f"{scheme}.txt"
             p.write_text("\n".join(links) + ("\n" if links else ""), encoding="utf-8")
             pb = by_dir / f"{scheme}.base64"
             pb.write_text(encode_subscription_base64(links), encoding="utf-8")
             paths[f"proto_{scheme}"] = p
 
-        # Keep Pages root friendly
         readme = self.output_dir / "README.md"
         readme.write_text(
             "# Subscriptions\n\n"
+            "Lists are sorted by **lowest ping first**. Dead servers are removed on each refresh.\n\n"
             "Add one of these URLs as a subscription in v2rayNG / Clash-compatible clients "
             "that support V2Ray share links.\n\n"
             + (
@@ -117,5 +124,5 @@ class Publisher:
         )
         paths["readme"] = readme
 
-        logger.info("published all=%d best=%d dir=%s", len(all_links), len(best_links), self.output_dir)
+        logger.info("published all=%d best=%d dir=%s sort=latency", len(all_links), len(best_links), self.output_dir)
         return paths
