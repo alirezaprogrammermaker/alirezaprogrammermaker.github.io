@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from typing import Any
 
@@ -55,6 +56,7 @@ class Fetcher:
         self.backoff_max = float(fetch.get("backoff_max_sec", 20))
         self.connect_timeout = float(fetch.get("connect_timeout_sec", 15))
         self.read_timeout = float(fetch.get("read_timeout_sec", 45))
+        self.concurrency = int(fetch.get("concurrency", 8))
 
     def _client(self, timeout_sec: float) -> httpx.Client:
         timeout = httpx.Timeout(
@@ -86,47 +88,54 @@ class Fetcher:
 
         return _do()
 
+    def _fetch_one(self, src: SourceSpec) -> tuple[list[ProxyConfig], SourceResult]:
+        t0 = time.monotonic()
+        try:
+            body = self.fetch_text(src.url, src.timeout_sec)
+            text = decode_subscription_body(body)
+            parsed = parse_many(text)
+            for c in parsed:
+                c.source_id = src.id
+            elapsed = (time.monotonic() - t0) * 1000
+            result = SourceResult(
+                source_id=src.id,
+                url=src.url,
+                ok=True,
+                configs_found=len(parsed),
+                elapsed_ms=elapsed,
+            )
+            logger.info("source ok id=%s found=%d elapsed_ms=%.0f", src.id, len(parsed), elapsed)
+            return parsed, result
+        except Exception as exc:
+            elapsed = (time.monotonic() - t0) * 1000
+            result = SourceResult(
+                source_id=src.id,
+                url=src.url,
+                ok=False,
+                error=type(exc).__name__,
+                elapsed_ms=elapsed,
+            )
+            logger.warning("source fail id=%s err=%s", src.id, type(exc).__name__)
+            return [], result
+
     def collect(self, sources: list[SourceSpec]) -> tuple[list[ProxyConfig], list[SourceResult]]:
+        enabled = [s for s in sources if s.enabled]
+        for s in sources:
+            if not s.enabled:
+                logger.info("skip disabled source id=%s", s.id)
+
         configs: list[ProxyConfig] = []
         results: list[SourceResult] = []
-        for src in sources:
-            if not src.enabled:
-                logger.info("skip disabled source id=%s", src.id)
-                continue
-            t0 = time.monotonic()
-            try:
-                body = self.fetch_text(src.url, src.timeout_sec)
-                text = decode_subscription_body(body)
-                parsed = parse_many(text)
-                for c in parsed:
-                    c.source_id = src.id  # internal tracking only
+        if not enabled:
+            return configs, results
+
+        workers = max(1, min(self.concurrency, len(enabled)))
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = {pool.submit(self._fetch_one, src): src for src in enabled}
+            for fut in as_completed(futs):
+                parsed, result = fut.result()
                 configs.extend(parsed)
-                elapsed = (time.monotonic() - t0) * 1000
-                results.append(
-                    SourceResult(
-                        source_id=src.id,
-                        url=src.url,
-                        ok=True,
-                        configs_found=len(parsed),
-                        elapsed_ms=elapsed,
-                    )
-                )
-                logger.info(
-                    "source ok id=%s found=%d elapsed_ms=%.0f",
-                    src.id,
-                    len(parsed),
-                    elapsed,
-                )
-            except Exception as exc:
-                elapsed = (time.monotonic() - t0) * 1000
-                results.append(
-                    SourceResult(
-                        source_id=src.id,
-                        url=src.url,
-                        ok=False,
-                        error=type(exc).__name__,
-                        elapsed_ms=elapsed,
-                    )
-                )
-                logger.warning("source fail id=%s err=%s", src.id, type(exc).__name__)
+                results.append(result)
+        # Stable order by source id for metrics readability
+        results.sort(key=lambda r: r.source_id)
         return configs, results

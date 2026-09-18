@@ -23,8 +23,8 @@ pipeline:
   max_healthy_publish: 300
   max_telegram_post_per_run: 15
   best_score_threshold: 40
-  # Drop if not reconfirmed (~6 missed 2-min watches)
-  healthy_max_age_hours: 0.2
+  # Drop if not reconfirmed (~15 min — real Xray probes are slower than TCP-open fakes)
+  healthy_max_age_hours: 0.25
 
 fetch:
   user_agent: "v2agg/1.0 (+https://github.com/alirezaprogrammermaker/alirezaprogrammermaker.github.io)"
@@ -33,6 +33,7 @@ fetch:
   backoff_max_sec: 20
   connect_timeout_sec: 15
   read_timeout_sec: 45
+  concurrency: 10
 
 validation:
   allowed_schemes:
@@ -69,6 +70,8 @@ testing:
   tcp_timeout_sec: 4
   tls_timeout_sec: 7
   xray_timeout_sec: 18
+  # Never treat "TCP port open" as a working proxy when Xray can probe (avoids garbage hy2/etc.)
+  accept_tcp_only: false
   concurrency: 24
   watch_concurrency: 16
   # Latency scoring (ms)

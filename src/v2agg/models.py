@@ -60,13 +60,19 @@ class ProxyConfig:
     def ensure_fingerprint(self) -> str:
         if self.fingerprint:
             return self.fingerprint
+        sec = (self.security or "").lower().strip()
+        if sec in {"", "none", "0", "false"}:
+            sec = ""
+        net = (self.network or "").lower().strip()
+        if net in {"", "none"}:
+            net = ""
         parts = [
             self.scheme.lower().strip(),
             self.host.lower().strip(),
             str(self.port),
             (self.uuid_or_password or "").strip(),
-            (self.network or "").lower().strip(),
-            (self.security or "").lower().strip(),
+            net,
+            sec,
             (self.sni or "").lower().strip(),
             (self.path or "").strip(),
         ]
