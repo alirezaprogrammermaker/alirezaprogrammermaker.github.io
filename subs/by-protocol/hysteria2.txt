@@ -14,3 +14,4 @@ hysteria2://6aab8efdf13945829ae3699c342be406@31.76.80.69:443?security=tls&obfs=s
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A1EPODONIOS
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?insecure=0&sni=ru1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A1%40proxy_kafee
 hysteria2://sOiWCQ2AdIV0OWNuqQVyWp4JZnRxdyLROSjX@news.gazette.help:443?sni=news.gazette.help#%E2%9A%A1%E9%98%BF%E8%81%94%E9%85%8B
+hy2://mkL3AfdSZIpTWRB9TcWPn9vywPGN89MRHg3ToRDj@gta.internet-card.sbs:443/?insecure=1&sni=gta.internet-card.sbs#%E2%9A%A1EPODONIOS
