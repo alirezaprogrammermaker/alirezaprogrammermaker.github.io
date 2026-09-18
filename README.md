@@ -16,7 +16,7 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback
 - Publishes to `subs/` for GitHub Pages
 - Telegram: best configs + nightly summary + channel description update
-- Resumable runs for the ~6h public Actions limit (checkpoint via cache/artifact)
+- **Continuous ~6h job**: discovery loop finds new servers; parallel **2‑min health-watch** re-checks the whole healthy list, drops dead, and git-pushes so Pages updates immediately
 - **Never** mentions sources or scrape methods in Telegram or public subscription files
 
 ### Fork & secrets
@@ -69,14 +69,14 @@ python -m v2agg --mode refresh --telegram-dry-run --print-metrics
 pytest -q
 ```
 
-### Cron & 6h resume
+### Cron & continuous 6h + 2‑min watch
 
 | Workflow | Schedule (UTC) | Purpose |
 |----------|----------------|---------|
-| `refresh.yml` | every 3 hours | collect → test → publish → Telegram best |
-| `nightly.yml` | 00:30 | refresh + nightly summary report |
+| `refresh.yml` | every 5 hours | continuous discovery + parallel 2‑min healthy re-check (~5h30m) |
+| `nightly.yml` | 00:30 | single-pass refresh + nightly summary report |
 
-`pipeline.max_runtime_sec` (~5h30m) stops testing before the runner hard limit, writes `state/checkpoint.json`, uploads artifact + cache. The **next** cron restores state and continues untested fingerprints, then publishes and clears the checkpoint. Only `subs/` is committed.
+While the job is alive, newly found working servers are merged into `subs/` and pushed right away; dead ones are removed on the next 2‑minute watch. Cron starts the next job before the previous budget ends for near-continuous coverage.
 
 ### Dry-run Telegram
 

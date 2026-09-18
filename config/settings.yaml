@@ -2,18 +2,27 @@
 
 app:
   name: v2agg
+  pages_base_url: "https://alirezaprogrammermaker.github.io"
   # Public-facing channel description (no source / method mentions)
   channel_description: "Active V2Ray/Xray configs · auto-tested · refreshed regularly"
 
 pipeline:
-  # Max wall time budget before writing checkpoint and exiting cleanly (seconds).
-  # GitHub Actions public runners ~6h; leave headroom for publish + Telegram.
+  # Stay alive ~5h30m; cron every 5h starts the next job for near-continuous coverage.
+  continuous: true
   max_runtime_sec: 19800  # 5h 30m
+  # Parallel watchdog: re-probe EVERY healthy server this often; drop dead immediately
+  health_watch_interval_sec: 120
+  discovery_cycle_pause_sec: 10
+  # Push subs/ whenever the live list changes (new alive / dead removed)
+  git_publish: true
   checkpoint_interval_sec: 120
-  max_configs_to_test_per_run: 800
-  max_healthy_publish: 200
+  max_configs_to_test_per_run: 1200
+  retest_healthy_first: true
+  max_healthy_publish: 300
   max_telegram_post_per_run: 15
   best_score_threshold: 40
+  # Drop if not reconfirmed (~6 missed 2-min watches)
+  healthy_max_age_hours: 0.2
 
 fetch:
   user_agent: "v2agg/1.0 (+https://github.com/alirezaprogrammermaker/alirezaprogrammermaker.github.io)"
@@ -24,6 +33,7 @@ fetch:
   read_timeout_sec: 45
 
 validation:
+  # Keep the same schemes as the working #4 build (do not expand blindly)
   allowed_schemes:
     - vmess
     - vless
@@ -45,12 +55,16 @@ testing:
   tls_timeout_sec: 8
   xray_timeout_sec: 20
   concurrency: 16
+  watch_concurrency: 16
   # Latency scoring (ms)
   score_latency_excellent_ms: 400
   score_latency_good_ms: 1200
   score_latency_ok_ms: 3000
   # Local SOCKS base port for xray probes (each worker + offset)
   local_socks_base_port: 21000
+  # Parallel health-watch uses a separate port range / workdir
+  watch_socks_base_port: 26000
+  watch_xray_workdir: state/runtime/xray-watch
   xray_bin: bin/xray
   xray_workdir: state/runtime/xray
 
