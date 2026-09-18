@@ -47,6 +47,7 @@ class Pipeline:
         tw = watch_settings.setdefault("testing", {})
         tw["local_socks_base_port"] = int(tw.get("watch_socks_base_port") or 26000)
         tw["xray_workdir"] = tw.get("watch_xray_workdir") or "state/runtime/xray-watch"
+        tw["hysteria_workdir"] = tw.get("watch_hysteria_workdir") or "state/runtime/hysteria-watch"
         tw["concurrency"] = int(tw.get("watch_concurrency") or min(16, int(tw.get("concurrency") or 16)))
         self.watch_tester = LiveTester(watch_settings)
         self.publisher = Publisher(self.settings)
@@ -254,19 +255,19 @@ class Pipeline:
             if fp not in seen:
                 candidates.append(c)
                 seen.add(fp)
-        # Probe Xray-verifiable schemes first (vmess/vless/trojan/ss) — real quality
+        # Probe verifiable schemes first (xray + hysteria2) — real quality for clients
         from v2agg.test.live import LiveTester
 
-        xray_schemes = LiveTester.XRAY_SCHEMES
-        preferred = [c for c in candidates if c.scheme.lower() in xray_schemes]
-        other = [c for c in candidates if c.scheme.lower() not in xray_schemes]
+        preferred_schemes = LiveTester.XRAY_SCHEMES | LiveTester.HY2_SCHEMES
+        preferred = [c for c in candidates if c.scheme.lower() in preferred_schemes]
+        other = [c for c in candidates if c.scheme.lower() not in preferred_schemes]
         candidates = preferred + other
         metrics.after_dedup = len(candidates)
         batch = candidates[: self.max_test]
         logger.info(
-            "discovery cycle queue=%d (xray_schemes=%d)",
+            "discovery cycle queue=%d (verifiable_schemes=%d)",
             len(batch),
-            sum(1 for c in batch if c.scheme.lower() in xray_schemes),
+            sum(1 for c in batch if c.scheme.lower() in preferred_schemes),
         )
         if not batch:
             return

@@ -80,7 +80,8 @@ def _vmess_security(tls_val: object) -> str:
 def parse_vmess(link: str) -> ProxyConfig | None:
     if not link.lower().startswith("vmess://"):
         return None
-    payload = link[8:]
+    # Clients / subscriptions often append #remark — never feed it into base64 JSON
+    payload = link[8:].split("#", 1)[0].strip()
     obj = _b64json(payload)
     if not obj:
         return None
@@ -92,13 +93,19 @@ def parse_vmess(link: str) -> ProxyConfig | None:
     uuid = str(obj.get("id") or "").strip()
     if not host or not port or not uuid:
         return None
+    # Prefer URL fragment remark when present (subscription display name)
+    frag = ""
+    if "#" in link:
+        from urllib.parse import unquote
+
+        frag = unquote(link.rsplit("#", 1)[-1]).strip()
     cfg = ProxyConfig(
         scheme="vmess",
         raw=link.strip(),
         host=host,
         port=port,
         uuid_or_password=uuid,
-        remark=str(obj.get("ps") or ""),
+        remark=frag or str(obj.get("ps") or ""),
         network=str(obj.get("net") or ""),
         security=_vmess_security(obj.get("tls")),
         sni=str(obj.get("sni") or obj.get("host") or ""),

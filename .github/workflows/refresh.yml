@@ -78,6 +78,11 @@ jobs:
           bash scripts/install-xray.sh
           echo "${{ github.workspace }}/bin" >> "$GITHUB_PATH"
 
+      - name: Install hysteria2
+        run: |
+          bash scripts/install-hysteria.sh
+          echo "${{ github.workspace }}/bin" >> "$GITHUB_PATH"
+
       - name: Restore state cache
         uses: actions/cache/restore@v4
         with:
