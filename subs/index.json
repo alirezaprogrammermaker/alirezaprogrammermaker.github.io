@@ -1,6 +1,6 @@
 {
-  "count_all": 0,
-  "count_best": 0,
+  "count_all": 32,
+  "count_best": 26,
   "sort": "latency_asc",
   "files": {
     "all": "all.txt",
