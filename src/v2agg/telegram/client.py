@@ -21,7 +21,7 @@ class TelegramClient:
         tg = settings.get("telegram") or {}
         self.token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
         self.channel_id = (os.environ.get("TELEGRAM_CHANNEL_ID") or "").strip()
-        self.channel_username = (tg.get("channel_username") or "@v2ray_active_config_bot").strip()
+        self.channel_username = (tg.get("channel_username") or "@v2ray_active_config").strip()
         self.rate_per_min = float(tg.get("rate_limit_per_minute", 12))
         self.dry_run = bool(tg.get("dry_run", False)) or os.environ.get("TELEGRAM_DRY_RUN", "").lower() in {
             "1",

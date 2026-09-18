@@ -24,7 +24,7 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 1. Fork / clone this repo (GitHub Pages site: `alirezaprogrammermaker.github.io`)
 2. Repo **Settings → Secrets and variables → Actions**, add:
    - `TELEGRAM_BOT_TOKEN` — bot token (bot must be **admin** of the channel)
-   - `TELEGRAM_CHANNEL_ID` — numeric chat id **or** `@v2ray_active_config_bot`
+   - `TELEGRAM_CHANNEL_ID` — numeric chat id **or** `@v2ray_active_config` (channel; not the bot username)
 3. Enable **Actions** and **GitHub Pages** (deploy from branch `main` / root, or your existing Pages setup)
 4. Ensure the workflow has permission to push (`contents: write`) so `subs/` can be updated
 
@@ -106,7 +106,7 @@ tests/
 1. ریپو را Fork کنید
 2. در Secrets اکشن‌ها این‌ها را بگذارید:
    - `TELEGRAM_BOT_TOKEN`
-   - `TELEGRAM_CHANNEL_ID` (مثلاً `@v2ray_active_config_bot`)
+   - `TELEGRAM_CHANNEL_ID` (مثلاً `@v2ray_active_config` — کانال، نه یوزرنیم بات)
 3. Actions را فعال کنید؛ بات باید ادمین کانال باشد
 4. منابع را در `config/sources.yaml` اضافه کنید (`enabled: true`)
 

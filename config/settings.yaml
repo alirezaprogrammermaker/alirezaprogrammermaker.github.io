@@ -68,8 +68,8 @@ publish:
 
 telegram:
   # Secrets come from env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID
-  # Channel username @v2ray_active_config_bot resolves via getChat if ID not numeric.
-  channel_username: "@v2ray_active_config_bot"
+  # Channel username (not the bot username). Resolves via getChat if ID not numeric.
+  channel_username: "@v2ray_active_config"
   rate_limit_per_minute: 12
   post_best: true
   update_description: true
