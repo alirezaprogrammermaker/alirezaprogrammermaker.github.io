@@ -132,8 +132,10 @@ class TelegramClient:
         ]
         return self.send_message("\n".join(lines))
 
-    def update_description(self, last_activity: str | None = None) -> bool:
+    def update_description(self, last_activity: str | None = None, alive_count: int | None = None) -> bool:
         desc = self.channel_description.strip()
+        if alive_count is not None:
+            desc = f"{desc}\nAlive: {alive_count}"
         if last_activity:
             desc = f"{desc}\nLast update: {last_activity}"
         desc = desc[:255]
