@@ -278,8 +278,8 @@ class LiveTester:
         if self._use_xray:
             local_port = self.local_base + (worker_idx % 5000)
             latency = self.xray.probe(cfg, local_port)
-            # Fall back to TCP if xray config unsupported for scheme
-            if latency is None and cfg.scheme in {"hysteria2", "ssr"}:
+            # Fall back to TCP for schemes Xray outbound builder doesn't cover
+            if latency is None and cfg.scheme not in {"vmess", "vless", "trojan", "ss"}:
                 latency = tcp_connect(cfg.host, cfg.port, self.tcp_timeout)
         else:
             # Real TCP connect always required

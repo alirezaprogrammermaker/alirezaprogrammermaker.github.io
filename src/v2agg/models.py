@@ -6,7 +6,28 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
-ALLOWED_SCHEMES = ("vmess", "vless", "trojan", "ss", "ssr", "hysteria2", "hy2")
+ALLOWED_SCHEMES = (
+    "vmess",
+    "vless",
+    "trojan",
+    "ss",
+    "ssr",
+    "hysteria2",
+    "hy2",
+    "hysteria",
+    "tuic",
+    "wireguard",
+    "wg",
+    "socks",
+    "socks5",
+    "http",
+    "https",
+    "juicity",
+    "anytls",
+    "brook",
+    "naive",
+    "mieru",
+)
 
 
 @dataclass

@@ -13,7 +13,8 @@ name: Refresh subscriptions
 
 on:
   schedule:
-    - cron: "17 */3 * * *"
+    # Hourly — servers die quickly; keep public lists fresh
+    - cron: "17 * * * *"
   push:
     branches: [main]
     paths:

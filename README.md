@@ -14,7 +14,9 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Parses `vmess` / `vless` / `trojan` / `ss` / `hysteria2` (and related)
 - Dedup by outbound fingerprint; fail-count & max-age eviction
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback
-- Publishes to `subs/` for GitHub Pages
+- Publishes to `subs/` for GitHub Pages (**sorted by lowest ping first**)
+- Continuously refreshes (**hourly**): dead servers removed, healthy ones re-tested first
+- Protocols: `vmess` `vless` `trojan` `ss` `ssr` `hysteria`/`hysteria2` `tuic` `wireguard` `socks` `http` `juicity` `anytls` `brook` `naive` `mieru`
 - Telegram: best configs + nightly summary + channel description update
 - Channel description shows **Shamsi (Tehran) last activity** plus subscription URLs
 - Resumable runs for the ~6h public Actions limit (checkpoint via cache/artifact)
