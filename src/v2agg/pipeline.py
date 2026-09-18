@@ -173,13 +173,17 @@ class Pipeline:
             self._health_watch_once()
         except Exception as exc:
             logger.warning("health-watch initial pass failed: %s", type(exc).__name__)
-        while not self._stop_watch.wait(self.health_watch_interval):
-            if self._should_stop():
-                break
+        while not self._should_stop():
+            t0 = time.monotonic()
             try:
                 self._health_watch_once()
             except Exception as exc:
                 logger.warning("health-watch pass failed: %s", type(exc).__name__)
+            # Sleep only the remainder of the interval (probe time counts toward 2 min cadence)
+            elapsed = time.monotonic() - t0
+            wait_for = max(1.0, self.health_watch_interval - elapsed)
+            if self._stop_watch.wait(wait_for):
+                break
         logger.info("health-watch stopped")
 
     def _discovery_cycle(self, metrics: RunMetrics, posted: set[str]) -> None:

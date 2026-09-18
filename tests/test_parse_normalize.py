@@ -145,3 +145,36 @@ def test_sort_by_latency():
     ordered = sort_by_latency([a, b])
     assert ordered[0].latency_ms == 100
 
+
+def test_fingerprint_normalizes_empty_security():
+    c = ProxyConfig(scheme="vless", raw="vless://u@h:1", host="h", port=1, uuid_or_password="u", security="none")
+    d = ProxyConfig(scheme="vless", raw="vless://u@h:1", host="h", port=1, uuid_or_password="u", security="")
+    assert c.ensure_fingerprint() == d.ensure_fingerprint()
+
+
+def test_no_tcp_fake_alive_for_hysteria_when_xray_mode():
+    from v2agg.test.live import LiveTester
+
+    settings = {
+        "testing": {
+            "mode": "xray",
+            "accept_tcp_only": False,
+            "xray_bin": "/nonexistent/xray-binary",
+            "concurrency": 1,
+        }
+    }
+    # Force xray path even if binary missing: patch available()
+    tester = LiveTester(settings)
+    tester._use_xray = True  # type: ignore[attr-defined]
+    tester.xray.probe = lambda cfg, port: None  # type: ignore[method-assign]
+    cfg = ProxyConfig(
+        scheme="hysteria2",
+        raw="hysteria2://p@1.2.3.4:443?sni=x",
+        host="1.2.3.4",
+        port=443,
+        uuid_or_password="p",
+    )
+    cfg.ensure_fingerprint()
+    out = tester.test_one(cfg)
+    assert out.alive is False
+

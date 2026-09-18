@@ -249,6 +249,11 @@ class XrayProbe:
 class LiveTester:
     """Real connectivity tests — never fake-pass."""
 
+    # Schemes we can verify through Xray SOCKS→HTTP probe
+    XRAY_SCHEMES = frozenset({"vmess", "vless", "trojan", "ss"})
+    # Schemes we can verify by speaking the proxy protocol directly via httpx
+    HTTPX_PROXY_SCHEMES = frozenset({"socks", "http"})
+
     def __init__(self, settings: dict[str, Any]) -> None:
         self.settings = settings
         t = settings.get("testing") or {}
@@ -259,6 +264,8 @@ class LiveTester:
         self.concurrency = int(t.get("concurrency", 16))
         self.probe_url = t.get("probe_url") or "https://www.cloudflare.com/cdn-cgi/trace"
         self.local_base = int(t.get("local_socks_base_port", 21000))
+        # When Xray is available, never treat "TCP port open" as proof of a working proxy
+        self.accept_tcp_only = bool(t.get("accept_tcp_only", False))
         self.xray = XrayProbe(
             xray_bin=t.get("xray_bin") or "xray",
             workdir=Path(t.get("xray_workdir") or "state/runtime/xray"),
@@ -267,22 +274,50 @@ class LiveTester:
         )
         self._use_xray = self.mode == "xray" or (self.mode == "auto" and self.xray.available())
         if self._use_xray:
-            logger.info("live test mode=xray binary=%s", self.xray.xray_bin)
+            logger.info("live test mode=xray binary=%s accept_tcp_only=%s", self.xray.xray_bin, self.accept_tcp_only)
         else:
             logger.info("live test mode=tcp/tls (xray unavailable or disabled)")
+
+    def _httpx_proxy_probe(self, cfg: ProxyConfig) -> float | None:
+        """Probe socks/http proxies by fetching probe_url through them."""
+        userinfo = cfg.uuid_or_password or ""
+        auth = ""
+        if userinfo and userinfo != ":":
+            auth = f"{userinfo}@"
+        if cfg.scheme == "socks":
+            proxy = f"socks5://{auth}{cfg.host}:{cfg.port}"
+        else:
+            proxy = f"http://{auth}{cfg.host}:{cfg.port}"
+        try:
+            t0 = time.monotonic()
+            with httpx.Client(proxy=proxy, timeout=self.xray_timeout, follow_redirects=True, verify=False) as client:
+                resp = client.get(self.probe_url)
+                if resp.status_code >= 500:
+                    return None
+            return (time.monotonic() - t0) * 1000
+        except Exception as exc:
+            logger.debug("httpx proxy probe fail fp=%s err=%s", cfg.fingerprint, type(exc).__name__)
+            return None
 
     def test_one(self, cfg: ProxyConfig, worker_idx: int = 0) -> ProxyConfig:
         cfg.last_test_ts = time.time()
         latency: float | None = None
+        scheme = (cfg.scheme or "").lower()
 
-        if self._use_xray:
+        if self._use_xray and scheme in self.XRAY_SCHEMES:
             local_port = self.local_base + (worker_idx % 5000)
             latency = self.xray.probe(cfg, local_port)
-            # Fall back to TCP for schemes Xray outbound builder doesn't cover
-            if latency is None and cfg.scheme not in {"vmess", "vless", "trojan", "ss"}:
+        elif scheme in self.HTTPX_PROXY_SCHEMES:
+            latency = self._httpx_proxy_probe(cfg)
+        elif self._use_xray and scheme not in self.XRAY_SCHEMES:
+            # hysteria2/tuic/… — Xray outbound not built; TCP-open is NOT a real pass
+            if self.accept_tcp_only:
                 latency = tcp_connect(cfg.host, cfg.port, self.tcp_timeout)
+            else:
+                latency = None
+                logger.debug("skip unverified scheme=%s (no real proxy probe)", scheme)
         else:
-            # Real TCP connect always required
+            # Pure TCP/TLS mode (no xray) — best-effort reachability only
             latency = tcp_connect(cfg.host, cfg.port, self.tcp_timeout)
             if latency is not None and (cfg.security or "").lower() in {"tls", "xtls", "reality"}:
                 tls_lat = tls_handshake(cfg.host, cfg.port, cfg.sni or cfg.host, self.tls_timeout)
