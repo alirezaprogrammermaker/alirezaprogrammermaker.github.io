@@ -57,7 +57,7 @@ class ProxyConfig:
     last_test_ts: float | None = None
     first_seen_ts: float | None = None
     source_id: str = ""  # internal only — never published
-    usecase: str = ""  # بازی | وب | دانلود — derived from real probe metrics
+    usecase: str = ""  # unused publicly — remarks are ping-only again
 
     def ensure_fingerprint(self) -> str:
         if self.fingerprint:

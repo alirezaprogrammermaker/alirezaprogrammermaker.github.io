@@ -13,7 +13,6 @@ from typing import Any, Callable
 import httpx
 
 from v2agg.models import ProxyConfig
-from v2agg.util.ranking import classify_usecase
 from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
@@ -539,7 +538,7 @@ class LiveTester:
         cfg.score = score_latency(latency, self.settings)
         cfg.fail_count = 0
         cfg.last_ok_ts = time.time()
-        cfg.usecase = classify_usecase(cfg, self.settings)
+        cfg.usecase = ""
         return cfg
 
     def test_many(

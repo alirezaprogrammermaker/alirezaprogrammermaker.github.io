@@ -123,12 +123,6 @@ class Pipeline:
                 if c.alive:
                     c.last_ok_ts = now
         fresh = self._filter_fresh_healthy(healthy)
-        # Always refresh usecase from current metrics (latency/throughput may have changed)
-        from v2agg.util.ranking import classify_usecase
-
-        for c in fresh:
-            if c.alive:
-                c.usecase = classify_usecase(c, self.settings)
         self.store.save_healthy(fresh)
 
         # Never wipe a non-empty public list with an empty publish mid-run
@@ -173,10 +167,7 @@ class Pipeline:
         for c in configs:
             if c.alive and c.last_ok_ts is None:
                 c.last_ok_ts = now
-            if c.alive and not c.usecase:
-                from v2agg.util.ranking import classify_usecase
-
-                c.usecase = classify_usecase(c, self.settings)
+            c.usecase = ""
         self.publisher.publish(configs)
         logger.info("retagged public list reason=%s count=%d", reason, len(configs))
         if self.git_publish:

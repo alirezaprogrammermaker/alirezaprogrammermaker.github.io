@@ -174,7 +174,7 @@ def test_retag_rewrites_middle_dot_remarks(tmp_path: Path):
     sources = tmp_path / "sources.yaml"
     subs = tmp_path / "subs"
     subs.mkdir()
-    # Broken middle-dot remark format from earlier release
+    # Broken middle-dot + usecase remark format from earlier release
     bad = "vless://11111111-2222-3333-4444-555555555555@example.com:443?security=tls&type=tcp#" + quote(
         "⚡40ms·بازی-1", safe=""
     )
@@ -197,10 +197,6 @@ publish:
   output_dir: {subs}
   all_file: all.txt
   remark_prefix: "⚡"
-  usecase:
-    game_max_ms: 150
-    web_max_ms: 500
-    download_min_kbps: 400
 testing:
   mode: tcp
 telegram:
@@ -219,4 +215,6 @@ logging:
     assert "·" not in text and "%C2%B7" not in text
     from urllib.parse import unquote
 
-    assert "بازی" in unquote(text)
+    decoded = unquote(text)
+    assert "بازی" not in decoded
+    assert "40ms-1" in decoded
