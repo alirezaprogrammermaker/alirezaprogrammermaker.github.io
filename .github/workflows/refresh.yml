@@ -14,6 +14,15 @@ name: Refresh subscriptions
 on:
   schedule:
     - cron: "17 */3 * * *"
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "config/**"
+      - "scripts/**"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - ".github/workflows/refresh.yml"
   workflow_dispatch:
     inputs:
       mode:
