@@ -1,19 +1,19 @@
 name: Refresh subscriptions
 
-# Continuous ~6h live job + cron handoff
-# ------------------------------------
-# Public GitHub-hosted runners allow ~6 hours per job. The aggregator runs in
-# continuous mode for ~5h30m:
-#   • discovery loop: fetch sources → live-test → merge healthy → publish
-#   • parallel health-watch (every 2 min): re-probe ALL healthy servers, drop dead,
-#     republish + git-push so Pages always mirrors a fresh list
-# Cron every 5h starts a fresh job (cancels any still-running previous job) for near-continuous coverage.
-# Ephemeral state restored via cache + artifact; `subs/` is committed for Pages.
+# Frequent refresh with resumable checkpoints.
+#
+# ## 6-hour resume model
+# Public GitHub-hosted runners allow ~6 hours per job. `pipeline.max_runtime_sec`
+# stops testing early, writes `state/checkpoint.json` (tested fingerprints + configs),
+# and exits 0. Ephemeral state is restored on the next cron via:
+#   1) cache restore (`v2agg-state-*`)
+#   2) previous-run artifact download (best effort)
+# Published outputs under `subs/` are committed for GitHub Pages. Checkpoint/healthy
+# DB stay out of git (.gitignore).
 
 on:
   schedule:
-    # Every 5 hours — overlaps the 5h30m runtime so the next run is ready to start
-    - cron: "17 */5 * * *"
+    - cron: "17 */3 * * *"
   push:
     branches: [main]
     paths:
@@ -41,8 +41,6 @@ on:
 
 concurrency:
   group: v2agg-refresh
-  # Cancel the previous long-running job when a new one is queued (cron/push/fix),
-  # so updates take effect immediately instead of waiting ~6h for the old job to finish.
   cancel-in-progress: true
 
 permissions:
@@ -56,8 +54,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -97,7 +93,7 @@ jobs:
           if_no_artifact_found: warn
         continue-on-error: true
 
-      - name: Run continuous aggregator (~5h30m + 2-min health watch)
+      - name: Run aggregator
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
@@ -131,6 +127,5 @@ jobs:
           path: state
           key: v2agg-state-${{ github.run_id }}-${{ github.run_attempt }}
 
-      - name: Final commit & push subscription files
-        if: always()
+      - name: Commit & push subscription files
         run: bash scripts/publish-subs.sh

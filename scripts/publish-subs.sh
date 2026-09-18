@@ -19,13 +19,4 @@ if git diff --cached --quiet; then
 fi
 
 git commit -m "chore(subs): refresh healthy subscription lists"
-
-# Rebase onto remote before push — continuous job pushes often; avoid non-fast-forward failures
-branch="$(git rev-parse --abbrev-ref HEAD)"
-if git rev-parse --verify "origin/${branch}" >/dev/null 2>&1; then
-  git pull --rebase --autostash origin "${branch}" || {
-    echo "pull --rebase failed; trying push anyway"
-  }
-fi
-
-git push origin "HEAD:${branch}"
+git push
