@@ -1,6 +1,6 @@
 {
-  "count_all": 0,
-  "count_best": 0,
+  "count_all": 143,
+  "count_best": 50,
   "files": {
     "all": "all.txt",
     "all_base64": "all.base64",
