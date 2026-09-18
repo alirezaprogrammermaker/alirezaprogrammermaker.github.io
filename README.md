@@ -16,6 +16,7 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback
 - Publishes to `subs/` for GitHub Pages
 - Telegram: best configs + nightly summary + channel description update
+- Channel description shows **Shamsi (Tehran) last activity** plus subscription URLs
 - Resumable runs for the ~6h public Actions limit (checkpoint via cache/artifact)
 - **Never** mentions sources or scrape methods in Telegram or public subscription files
 

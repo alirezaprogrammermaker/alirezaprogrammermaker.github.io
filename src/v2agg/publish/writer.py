@@ -27,6 +27,7 @@ class Publisher:
         self.remark_prefix = pub.get("remark_prefix") or "⚡"
         self.max_healthy = int((settings.get("pipeline") or {}).get("max_healthy_publish", 200))
         self.best_threshold = float((settings.get("pipeline") or {}).get("best_score_threshold", 40))
+        self.pages_base_url = ((settings.get("app") or {}).get("pages_base_url") or "").rstrip("/")
 
     def _public_links(self, configs: list[ProxyConfig]) -> list[str]:
         links: list[str] = []
@@ -58,24 +59,28 @@ class Publisher:
         paths["best_b64"] = self.output_dir / self.best_b64
         paths["best_b64"].write_text(encode_subscription_base64(best_links), encoding="utf-8")
 
-        # index for humans (no source mentions)
+        # index for humans (no source mentions); include absolute Pages URLs when configured
+        pages_base = self.pages_base_url
+        files = {
+            "all": self.all_file,
+            "all_base64": self.all_b64,
+            "best": self.best_file,
+            "best_base64": self.best_b64,
+        }
+        payload: dict[str, Any] = {
+            "count_all": len(all_links),
+            "count_best": len(best_links),
+            "files": files,
+        }
+        if pages_base:
+            payload["urls"] = {
+                "all": f"{pages_base}/subs/{self.all_file}",
+                "all_base64": f"{pages_base}/subs/{self.all_b64}",
+                "best": f"{pages_base}/subs/{self.best_file}",
+                "best_base64": f"{pages_base}/subs/{self.best_b64}",
+            }
         index = self.output_dir / "index.json"
-        index.write_text(
-            __import__("json").dumps(
-                {
-                    "count_all": len(all_links),
-                    "count_best": len(best_links),
-                    "files": {
-                        "all": self.all_file,
-                        "all_base64": self.all_b64,
-                        "best": self.best_file,
-                        "best_base64": self.best_b64,
-                    },
-                },
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
+        index.write_text(__import__("json").dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
         paths["index"] = index
 
         by_scheme: dict[str, list[ProxyConfig]] = defaultdict(list)
@@ -95,10 +100,19 @@ class Publisher:
             "# Subscriptions\n\n"
             "Add one of these URLs as a subscription in v2rayNG / Clash-compatible clients "
             "that support V2Ray share links.\n\n"
-            f"- All (base64): `{self.all_b64}`\n"
-            f"- Best (base64): `{self.best_b64}`\n"
-            f"- All (plain): `{self.all_file}`\n"
-            f"- Best (plain): `{self.best_file}`\n",
+            + (
+                f"- All (base64): `{self.pages_base_url}/subs/{self.all_b64}`\n"
+                f"- Best (base64): `{self.pages_base_url}/subs/{self.best_b64}`\n"
+                f"- All (plain): `{self.pages_base_url}/subs/{self.all_file}`\n"
+                f"- Best (plain): `{self.pages_base_url}/subs/{self.best_file}`\n"
+                if self.pages_base_url
+                else (
+                    f"- All (base64): `{self.all_b64}`\n"
+                    f"- Best (base64): `{self.best_b64}`\n"
+                    f"- All (plain): `{self.all_file}`\n"
+                    f"- Best (plain): `{self.best_file}`\n"
+                )
+            ),
             encoding="utf-8",
         )
         paths["readme"] = readme

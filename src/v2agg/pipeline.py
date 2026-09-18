@@ -14,6 +14,7 @@ from v2agg.telegram.client import TelegramClient
 from v2agg.test.live import LiveTester
 from v2agg.util.config import load_yaml
 from v2agg.util.logging import get_logger, setup_logging
+from v2agg.util.timefmt import format_activity_label
 
 logger = get_logger(__name__)
 
@@ -186,9 +187,11 @@ class Pipeline:
             metrics.telegram_posted = posted_count
             self._bump_daily(posted=posted_count, alive=metrics.alive, tested=metrics.tested)
 
-            now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
             try:
-                self.telegram.update_description(last_activity=now_str)
+                self.telegram.update_description(
+                    last_activity=format_activity_label(),
+                    alive_count=metrics.published or len(healthy_all),
+                )
             except Exception as exc:
                 logger.warning("telegram description update failed: %s", type(exc).__name__)
 
