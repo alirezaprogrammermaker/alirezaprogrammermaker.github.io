@@ -1,1 +1,1 @@
-trojan://wphetm3l4awlpn7y@202.133.90.105:1819?security=none&headerType=none&type=tcp#%E2%9A%A1EPODONIOS
+trojan://wphetm3l4awlpn7y@202.133.90.105:1819?security=none&headerType=&type=tcp#%E2%9A%A1EPODONIOS
