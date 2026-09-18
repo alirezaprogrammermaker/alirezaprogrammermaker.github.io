@@ -47,7 +47,6 @@ class Pipeline:
         tw = watch_settings.setdefault("testing", {})
         tw["local_socks_base_port"] = int(tw.get("watch_socks_base_port") or 26000)
         tw["xray_workdir"] = tw.get("watch_xray_workdir") or "state/runtime/xray-watch"
-        tw["hysteria_workdir"] = tw.get("watch_hysteria_workdir") or "state/runtime/hysteria-watch"
         tw["concurrency"] = int(tw.get("watch_concurrency") or min(16, int(tw.get("concurrency") or 16)))
         self.watch_tester = LiveTester(watch_settings)
         self.publisher = Publisher(self.settings)
@@ -116,38 +115,15 @@ class Pipeline:
 
     def _commit_healthy(self, healthy: list[ProxyConfig], *, reason: str) -> list[ProxyConfig]:
         """Persist + publish (+ optional git push). Caller should hold lock when merging state."""
-        # startup-retag must not age-evict before health-watch retests
-        if reason.startswith("startup"):
-            now = time.time()
-            for c in healthy:
-                if c.alive:
-                    c.last_ok_ts = now
         fresh = self._filter_fresh_healthy(healthy)
         self.store.save_healthy(fresh)
-
-        # Never wipe a non-empty public list with an empty publish mid-run
-        # (health-watch can clear fakes before discovery finds real proxies).
-        existing_all = self.publisher.output_dir / self.publisher.all_file
-        had_public = existing_all.is_file() and existing_all.stat().st_size > 0
-        if not fresh and had_public and reason not in {"shutdown", "force-empty"}:
-            logger.warning(
-                "skip empty publish reason=%s — keeping previous subs/ until real proxies found",
-                reason,
-            )
-            # Still rewrite remarks/ps if the on-disk list uses a broken format
-            if self.publisher.needs_remark_retag():
-                self._retag_public_list(reason=f"{reason}-retag")
-            return fresh
-
         self.publisher.publish(fresh)
         logger.info("list updated reason=%s alive=%d", reason, len(fresh))
-        if self.git_publish and fresh:
-            push_subs_if_changed()
-        elif self.git_publish and not fresh and reason in {"shutdown", "force-empty"}:
+        if self.git_publish:
             push_subs_if_changed()
         # Throttle channel description updates (at most every ~2 min)
         now = time.monotonic()
-        if fresh and now - self._last_desc_ts >= min(self.health_watch_interval, 120):
+        if now - self._last_desc_ts >= min(self.health_watch_interval, 120):
             try:
                 self.telegram.update_description(
                     last_activity=format_activity_label(),
@@ -158,21 +134,6 @@ class Pipeline:
                 logger.warning("telegram description update failed: %s", type(exc).__name__)
         return fresh
 
-    def _retag_public_list(self, *, reason: str) -> int:
-        """Re-publish existing public links with safe remarks (hyphen + vmess ps) immediately."""
-        configs = self.publisher.load_public_configs()
-        if not configs:
-            return 0
-        now = time.time()
-        for c in configs:
-            if c.alive and c.last_ok_ts is None:
-                c.last_ok_ts = now
-            c.usecase = ""
-        self.publisher.publish(configs)
-        logger.info("retagged public list reason=%s count=%d", reason, len(configs))
-        if self.git_publish:
-            push_subs_if_changed()
-        return len(configs)
     def _merge_alive_into_store(self, probed: list[ProxyConfig]) -> list[ProxyConfig]:
         """Apply probe results onto the healthy DB under lock; drop dead; add newly alive."""
         with self._lock:
@@ -207,20 +168,11 @@ class Pipeline:
 
     def _health_watch_loop(self) -> None:
         logger.info("health-watch started interval=%ss", int(self.health_watch_interval))
-        # If we already have a healthy list, clean fakes immediately.
-        # If empty, give discovery ~90s head start so we don't spin-clean while seeding.
-        with self._lock:
-            has_list = bool(self.store.load_healthy())
-        if has_list:
-            try:
-                self._health_watch_once()
-            except Exception as exc:
-                logger.warning("health-watch initial pass failed: %s", type(exc).__name__)
-        else:
-            logger.info("health-watch: empty list — waiting for discovery to seed first")
-            if self._stop_watch.wait(min(90.0, self.health_watch_interval)):
-                logger.info("health-watch stopped")
-                return
+        # Immediate first pass so stale list is cleaned ASAP at job start
+        try:
+            self._health_watch_once()
+        except Exception as exc:
+            logger.warning("health-watch initial pass failed: %s", type(exc).__name__)
         while not self._should_stop():
             t0 = time.monotonic()
             try:
@@ -273,20 +225,9 @@ class Pipeline:
             if fp not in seen:
                 candidates.append(c)
                 seen.add(fp)
-        # Probe verifiable schemes first (xray + hysteria2) — real quality for clients
-        from v2agg.test.live import LiveTester
-
-        preferred_schemes = LiveTester.XRAY_SCHEMES | LiveTester.HY2_SCHEMES
-        preferred = [c for c in candidates if c.scheme.lower() in preferred_schemes]
-        other = [c for c in candidates if c.scheme.lower() not in preferred_schemes]
-        candidates = preferred + other
         metrics.after_dedup = len(candidates)
         batch = candidates[: self.max_test]
-        logger.info(
-            "discovery cycle queue=%d (verifiable_schemes=%d)",
-            len(batch),
-            sum(1 for c in batch if c.scheme.lower() in preferred_schemes),
-        )
+        logger.info("discovery cycle queue=%d (newish focus)", len(batch))
         if not batch:
             return
 
@@ -332,25 +273,6 @@ class Pipeline:
             int(self.max_runtime),
             int(self.health_watch_interval),
         )
-        # Immediately fix on-disk remarks (middle-dot / stale vmess ps) so clients can connect
-        # without waiting for the first long probe cycle.
-        try:
-            with self._lock:
-                stored = self.store.load_healthy()
-                if stored:
-                    # Refresh age so startup publish is not wiped by healthy_max_age
-                    now = time.time()
-                    for c in stored:
-                        if c.alive and (c.last_ok_ts is None or (now - c.last_ok_ts) > 60):
-                            # Keep until health-watch retests; do not pretend a new probe
-                            if c.last_ok_ts is None:
-                                c.last_ok_ts = now
-                    self._commit_healthy(stored, reason="startup-retag")
-                elif self.publisher.needs_remark_retag():
-                    self._retag_public_list(reason="startup-public-retag")
-        except Exception as exc:
-            logger.warning("startup retag failed: %s", type(exc).__name__)
-
         watch = threading.Thread(target=self._health_watch_loop, name="health-watch", daemon=True)
         watch.start()
         cycle = 0

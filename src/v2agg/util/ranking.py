@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Iterable
+from typing import Iterable
 
 from v2agg.models import ProxyConfig
 
@@ -15,20 +15,8 @@ def sort_by_latency(configs: Iterable[ProxyConfig]) -> list[ProxyConfig]:
     return sorted(configs, key=latency_sort_key)
 
 
-def remark_with_latency(
-    cfg: ProxyConfig,
-    prefix: str,
-    index: int,
-    *,
-    settings: dict[str, Any] | None = None,
-) -> str:
-    """
-    Public remark — same simple format as before usecase labels.
-
-    Example: ⚡85ms-1
-    (settings kept for call-site compatibility; unused)
-    """
-    _ = settings
+def remark_with_latency(cfg: ProxyConfig, prefix: str, index: int) -> str:
+    """Public remark: ping first so client UIs show speed order clearly."""
     if cfg.latency_ms is not None and cfg.alive:
         ms = int(round(cfg.latency_ms))
         return f"{prefix}{ms}ms-{index}"[:40]

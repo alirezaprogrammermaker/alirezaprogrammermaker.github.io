@@ -23,7 +23,6 @@ class TelegramClient:
     """Telegram Bot API helper. Secrets from environment only."""
 
     def __init__(self, settings: dict[str, Any]) -> None:
-        self.settings = settings
         tg = settings.get("telegram") or {}
         app = settings.get("app") or {}
         self.token = (os.environ.get("TELEGRAM_BOT_TOKEN") or "").strip()
@@ -111,8 +110,9 @@ class TelegramClient:
         return True
 
     def post_config(self, cfg: ProxyConfig, index: int) -> bool:
-        remark = remark_with_latency(cfg, "⚡", index, settings=self.settings)
+        remark = remark_with_latency(cfg, "⚡", index)
         link = rewrite_remark(cfg.raw, remark)
+        # Escape backticks in link for Markdown
         safe_link = link.replace("`", "'")
         text = self.message_template.format(
             protocol=cfg.scheme.upper(),

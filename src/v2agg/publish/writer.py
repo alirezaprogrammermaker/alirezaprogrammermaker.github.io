@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
-from urllib.parse import unquote
 
 from v2agg.models import ProxyConfig
-from v2agg.parse.links import parse_link
 from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
@@ -15,17 +12,12 @@ from v2agg.util.ranking import remark_with_latency, sort_by_latency
 
 logger = get_logger(__name__)
 
-_MS_RE = re.compile(r"(\d+)\s*ms", re.IGNORECASE)
-# Legacy usecase-label remarks to strip on retag
-_LEGACY_TAG_RE = re.compile(r"(بازی|وب|دانلود)|%D8%A8%D8%A7%D8%B2%DB%8C|%D9%88%D8%A8|%D8%AF%D8%A7%D9%86%D9%84%D9%88%D8%AF")
-
 
 class Publisher:
     """Write lean subscription files for GitHub Pages (no provenance)."""
 
     def __init__(self, settings: dict[str, Any]) -> None:
         pub = settings.get("publish") or {}
-        self.settings = settings
         self.output_dir = Path(pub.get("output_dir") or "subs")
         self.all_file = pub.get("all_file") or "all.txt"
         self.all_b64 = pub.get("all_base64_file") or "all.base64"
@@ -42,48 +34,11 @@ class Publisher:
         links: list[str] = []
         for i, cfg in enumerate(configs, start=1):
             if self.sanitize:
-                remark = remark_with_latency(cfg, self.remark_prefix, i, settings=self.settings)
+                remark = remark_with_latency(cfg, self.remark_prefix, i)
             else:
                 remark = cfg.remark or f"{self.remark_prefix}{i}"
             links.append(rewrite_remark(cfg.raw, remark))
         return links
-
-    def load_public_configs(self) -> list[ProxyConfig]:
-        """Parse current subs/all.txt into configs (best-effort latency from remark)."""
-        path = self.output_dir / self.all_file
-        if not path.is_file():
-            return []
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        out: list[ProxyConfig] = []
-        for line in text.splitlines():
-            line = line.strip()
-            if not line or "://" not in line:
-                continue
-            cfg = parse_link(line)
-            if cfg is None:
-                continue
-            remark = unquote(line.rsplit("#", 1)[-1]) if "#" in line else (cfg.remark or "")
-            cfg.remark = remark
-            cfg.usecase = ""
-            m = _MS_RE.search(remark)
-            if m:
-                cfg.latency_ms = float(m.group(1))
-                cfg.alive = True
-                cfg.score = max(cfg.score, 50.0)
-            out.append(cfg)
-        return out
-
-    def needs_remark_retag(self) -> bool:
-        """True if public list still has legacy usecase/middle-dot remarks."""
-        path = self.output_dir / self.all_file
-        if not path.is_file() or path.stat().st_size == 0:
-            return False
-        text = path.read_text(encoding="utf-8", errors="ignore")
-        if "·" in text or "%C2%B7" in text:
-            return True
-        if _LEGACY_TAG_RE.search(text):
-            return True
-        return False
 
     def publish(self, healthy: list[ProxyConfig]) -> dict[str, Path]:
         alive = [c for c in healthy if c.alive]
@@ -92,6 +47,7 @@ class Publisher:
         best = [c for c in alive if c.score >= self.best_threshold][: max(20, self.max_healthy // 4)]
         # best already latency-sorted as a subset of alive order; re-sort for safety
         best = sort_by_latency(best)
+
         self.output_dir.mkdir(parents=True, exist_ok=True)
         by_dir = self.output_dir / self.by_proto
         by_dir.mkdir(parents=True, exist_ok=True)

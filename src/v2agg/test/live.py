@@ -17,18 +17,6 @@ from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
 
-_SOCKS_WARNING_EMITTED = False
-
-
-def socks_proxy_supported() -> bool:
-    """httpx needs the socksio extra to speak SOCKS5 (used for Xray local probes)."""
-    try:
-        import socksio  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
-
 
 def score_latency(latency_ms: float, settings: dict[str, Any]) -> float:
     t = settings.get("testing") or {}
@@ -178,52 +166,25 @@ def build_xray_config(cfg: ProxyConfig, local_port: int) -> dict[str, Any] | Non
 
 def _stream_settings(cfg: ProxyConfig) -> dict[str, Any]:
     network = (cfg.network or "tcp").lower()
-    if network in {"", "none"}:
-        network = "tcp"
     security = (cfg.security or "").lower()
-    stream: dict[str, Any] = {"network": network}
-    host_header = str(cfg.extra.get("host") or cfg.sni or cfg.host or "")
+    stream: dict[str, Any] = {"network": network if network else "tcp"}
     if security in {"tls", "xtls", "reality"}:
         stream["security"] = "tls" if security != "reality" else "reality"
+        tls: dict[str, Any] = {"serverName": cfg.sni or cfg.host, "allowInsecure": True}
         if stream["security"] == "reality":
-            stream["realitySettings"] = {
+            tls = {
                 "serverName": cfg.sni or cfg.host,
                 "fingerprint": cfg.extra.get("fp") or "chrome",
                 "publicKey": cfg.extra.get("pbk") or "",
                 "shortId": cfg.extra.get("sid") or "",
-                "spiderX": cfg.extra.get("spx") or "",
             }
+            stream["realitySettings"] = tls
         else:
-            stream["tlsSettings"] = {
-                "serverName": cfg.sni or host_header or cfg.host,
-                "allowInsecure": True,
-                "fingerprint": cfg.extra.get("fp") or "chrome",
-                "alpn": ["h2", "http/1.1"],
-            }
+            stream["tlsSettings"] = tls
     if network == "ws":
-        stream["wsSettings"] = {
-            "path": cfg.path or cfg.extra.get("path") or "/",
-            "headers": {"Host": host_header or cfg.host},
-        }
-    elif network in {"grpc", "gun"}:
-        stream["network"] = "grpc"
-        stream["grpcSettings"] = {
-            "serviceName": cfg.path or cfg.extra.get("serviceName") or cfg.extra.get("servicename") or ""
-        }
-    elif network == "h2":
-        stream["httpSettings"] = {
-            "path": cfg.path or "/",
-            "host": [host_header] if host_header else [cfg.host],
-        }
-    elif network == "httpupgrade":
-        stream["httpupgradeSettings"] = {
-            "path": cfg.path or "/",
-            "host": host_header or cfg.host,
-        }
-    elif network == "splithttp" or network == "xhttp":
-        stream["network"] = "xhttp" if network == "xhttp" else network
-        key = "xhttpSettings" if network == "xhttp" else "splithttpSettings"
-        stream[key] = {"path": cfg.path or "/", "host": host_header or cfg.host}
+        stream["wsSettings"] = {"path": cfg.path or "/", "headers": {"Host": cfg.sni or cfg.host}}
+    elif network == "grpc":
+        stream["grpcSettings"] = {"serviceName": cfg.path or cfg.extra.get("serviceName") or ""}
     return stream
 
 
@@ -240,11 +201,10 @@ class XrayProbe:
             return True
         return shutil.which(self.xray_bin) is not None
 
-    def probe(self, cfg: ProxyConfig, local_port: int) -> tuple[float | None, float | None]:
-        """Return (latency_ms, throughput_kbps). Either may be None."""
+    def probe(self, cfg: ProxyConfig, local_port: int) -> float | None:
         conf = build_xray_config(cfg, local_port)
         if conf is None:
-            return None, None
+            return None
         conf_path = self.workdir / f"cfg-{local_port}.json"
         conf_path.write_text(json.dumps(conf), encoding="utf-8")
         proc: subprocess.Popen[bytes] | None = None
@@ -254,153 +214,25 @@ class XrayProbe:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            # Give xray time to bind (busy runners need a bit more)
-            time.sleep(0.55)
+            # Give xray a moment to bind
+            time.sleep(0.35)
             if proc.poll() is not None:
-                time.sleep(0.35)
-                if proc.poll() is not None:
-                    return None, None
+                return None
             proxy = f"socks5://127.0.0.1:{local_port}"
-            latency: float | None = None
-            throughput: float | None = None
+            t0 = time.monotonic()
             with httpx.Client(
                 proxy=proxy,
                 timeout=self.timeout_sec,
                 follow_redirects=True,
                 verify=False,
             ) as client:
-                t0 = time.monotonic()
                 resp = client.get(self.probe_url)
                 if resp.status_code >= 500:
-                    return None, None
-                latency = (time.monotonic() - t0) * 1000
-                # Real throughput sample (~100 KiB) for download suitability.
-                # Short timeout so a hung speed test never stalls the worker pool.
-                try:
-                    t1 = time.monotonic()
-                    dl = client.get(
-                        "https://speed.cloudflare.com/__down?bytes=102400",
-                        timeout=min(6.0, float(self.timeout_sec)),
-                    )
-                    elapsed = max(time.monotonic() - t1, 0.001)
-                    if dl.status_code < 500 and dl.content:
-                        throughput = (len(dl.content) * 8 / 1000.0) / elapsed  # kbps
-                except Exception:
-                    throughput = None
-            return latency, throughput
+                    return None
+            return (time.monotonic() - t0) * 1000
         except Exception as exc:
-            global _SOCKS_WARNING_EMITTED
-            # Missing socksio makes EVERY xray probe look "dead" — surface loudly once.
-            if isinstance(exc, ImportError) and "socks" in str(exc).lower():
-                if not _SOCKS_WARNING_EMITTED:
-                    logger.error(
-                        "httpx SOCKS support missing (%s) — install httpx[socks]/socksio or all live probes fail",
-                        exc,
-                    )
-                    _SOCKS_WARNING_EMITTED = True
-            else:
-                logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
-            return None, None
-        finally:
-            if proc and proc.poll() is None:
-                proc.terminate()
-                try:
-                    proc.wait(timeout=2)
-                except subprocess.TimeoutExpired:
-                    proc.kill()
-            try:
-                conf_path.unlink(missing_ok=True)
-            except Exception:
-                pass
-
-
-class Hysteria2Probe:
-    """Real hysteria2 client probe via local SOCKS → HTTP (not TCP-open fakes)."""
-
-    def __init__(self, hy_bin: str, workdir: Path, probe_url: str, timeout_sec: float) -> None:
-        self.hy_bin = hy_bin
-        self.workdir = workdir
-        self.probe_url = probe_url
-        self.timeout_sec = timeout_sec
-        self.workdir.mkdir(parents=True, exist_ok=True)
-
-    def available(self) -> bool:
-        if Path(self.hy_bin).exists():
-            return True
-        return shutil.which(self.hy_bin) is not None
-
-    def build_client_config(self, cfg: ProxyConfig, local_port: int) -> dict[str, Any] | None:
-        scheme = (cfg.scheme or "").lower()
-        if scheme not in {"hysteria2", "hy2", "hysteria"}:
+            logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
             return None
-        auth = cfg.uuid_or_password or ""
-        if not auth:
-            return None
-        insecure_raw = cfg.extra.get("insecure")
-        if insecure_raw is None or str(insecure_raw).strip() == "":
-            # Public share links often use self-signed certs
-            insecure = True
-        else:
-            insecure = str(insecure_raw).lower() in {"1", "true", "yes"}
-        conf: dict[str, Any] = {
-            "server": f"{cfg.host}:{cfg.port}",
-            "auth": auth,
-            "tls": {"sni": cfg.sni or cfg.host, "insecure": insecure},
-            "socks5": {"listen": f"127.0.0.1:{local_port}"},
-        }
-        obfs = cfg.extra.get("obfs") or ""
-        obfs_password = cfg.extra.get("obfs-password") or cfg.extra.get("obfs_password") or ""
-        if obfs:
-            conf["obfs"] = {"type": obfs, "salamander": {"password": obfs_password}}
-        return conf
-
-    def probe(self, cfg: ProxyConfig, local_port: int) -> tuple[float | None, float | None]:
-        conf = self.build_client_config(cfg, local_port)
-        if conf is None:
-            return None, None
-        conf_path = self.workdir / f"hy2-{local_port}.json"
-        conf_path.write_text(json.dumps(conf), encoding="utf-8")
-        proc: subprocess.Popen[bytes] | None = None
-        try:
-            proc = subprocess.Popen(
-                [self.hy_bin, "-c", str(conf_path)],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            time.sleep(0.7)
-            if proc.poll() is not None:
-                time.sleep(0.4)
-                if proc.poll() is not None:
-                    return None, None
-            proxy = f"socks5://127.0.0.1:{local_port}"
-            latency: float | None = None
-            throughput: float | None = None
-            with httpx.Client(
-                proxy=proxy,
-                timeout=self.timeout_sec,
-                follow_redirects=True,
-                verify=False,
-            ) as client:
-                t0 = time.monotonic()
-                resp = client.get(self.probe_url)
-                if resp.status_code >= 500:
-                    return None, None
-                latency = (time.monotonic() - t0) * 1000
-                try:
-                    t1 = time.monotonic()
-                    dl = client.get(
-                        "https://speed.cloudflare.com/__down?bytes=102400",
-                        timeout=min(6.0, float(self.timeout_sec)),
-                    )
-                    elapsed = max(time.monotonic() - t1, 0.001)
-                    if dl.status_code < 500 and dl.content:
-                        throughput = (len(dl.content) * 8 / 1000.0) / elapsed
-                except Exception:
-                    throughput = None
-            return latency, throughput
-        except Exception as exc:
-            logger.debug("hy2 probe fail fp=%s err=%s", cfg.fingerprint, type(exc).__name__)
-            return None, None
         finally:
             if proc and proc.poll() is None:
                 proc.terminate()
@@ -419,8 +251,6 @@ class LiveTester:
 
     # Schemes we can verify through Xray SOCKS→HTTP probe
     XRAY_SCHEMES = frozenset({"vmess", "vless", "trojan", "ss"})
-    # Schemes verified with hysteria2 client (real QUIC path — not TCP-open)
-    HY2_SCHEMES = frozenset({"hysteria2", "hy2", "hysteria"})
     # Schemes we can verify by speaking the proxy protocol directly via httpx
     HTTPX_PROXY_SCHEMES = frozenset({"socks", "http"})
 
@@ -442,30 +272,12 @@ class LiveTester:
             probe_url=self.probe_url,
             timeout_sec=self.xray_timeout,
         )
-        self.hy2 = Hysteria2Probe(
-            hy_bin=t.get("hysteria_bin") or "bin/hysteria",
-            workdir=Path(t.get("hysteria_workdir") or "state/runtime/hysteria"),
-            probe_url=self.probe_url,
-            timeout_sec=float(t.get("hysteria_timeout_sec") or self.xray_timeout),
-        )
         self._use_xray = self.mode == "xray" or (self.mode == "auto" and self.xray.available())
-        self._use_hy2 = self.hy2.available()
-        if self._use_xray and not socks_proxy_supported():
-            logger.error(
-                "Xray binary present but httpx[socks]/socksio is NOT installed — "
-                "SOCKS probes cannot run; refusing fake TCP alives"
-            )
-            # Keep xray mode (don't fall back to TCP fakes); probes will hard-fail until deps fixed
         if self._use_xray:
-            logger.info(
-                "live test mode=xray binary=%s accept_tcp_only=%s socksio=%s hy2=%s",
-                self.xray.xray_bin,
-                self.accept_tcp_only,
-                socks_proxy_supported(),
-                self._use_hy2,
-            )
+            logger.info("live test mode=xray binary=%s accept_tcp_only=%s", self.xray.xray_bin, self.accept_tcp_only)
         else:
-            logger.info("live test mode=tcp/tls (xray unavailable or disabled) hy2=%s", self._use_hy2)
+            logger.info("live test mode=tcp/tls (xray unavailable or disabled)")
+
     def _httpx_proxy_probe(self, cfg: ProxyConfig) -> float | None:
         """Probe socks/http proxies by fetching probe_url through them."""
         userinfo = cfg.uuid_or_password or ""
@@ -490,25 +302,15 @@ class LiveTester:
     def test_one(self, cfg: ProxyConfig, worker_idx: int = 0) -> ProxyConfig:
         cfg.last_test_ts = time.time()
         latency: float | None = None
-        throughput: float | None = None
         scheme = (cfg.scheme or "").lower()
 
         if self._use_xray and scheme in self.XRAY_SCHEMES:
             local_port = self.local_base + (worker_idx % 5000)
-            latency, throughput = self.xray.probe(cfg, local_port)
-        elif self._use_hy2 and scheme in self.HY2_SCHEMES:
-            local_port = self.local_base + 4000 + (worker_idx % 4000)
-            latency, throughput = self.hy2.probe(cfg, local_port)
+            latency = self.xray.probe(cfg, local_port)
         elif scheme in self.HTTPX_PROXY_SCHEMES:
             latency = self._httpx_proxy_probe(cfg)
-        elif scheme in self.HY2_SCHEMES and not self._use_hy2:
-            if self.accept_tcp_only:
-                latency = tcp_connect(cfg.host, cfg.port, self.tcp_timeout)
-            else:
-                latency = None
-                logger.debug("skip hy2 — hysteria binary missing")
         elif self._use_xray and scheme not in self.XRAY_SCHEMES:
-            # tuic/wireguard/… — no real probe built yet
+            # hysteria2/tuic/… — Xray outbound not built; TCP-open is NOT a real pass
             if self.accept_tcp_only:
                 latency = tcp_connect(cfg.host, cfg.port, self.tcp_timeout)
             else:
@@ -523,22 +325,19 @@ class LiveTester:
                     latency = None
                 else:
                     latency = max(latency, tls_lat)
+
         if latency is None:
             cfg.alive = False
             cfg.latency_ms = None
-            cfg.throughput_kbps = None
-            cfg.usecase = ""
             cfg.score = 0.0
             cfg.fail_count += 1
             return cfg
 
         cfg.alive = True
         cfg.latency_ms = latency
-        cfg.throughput_kbps = throughput
         cfg.score = score_latency(latency, self.settings)
         cfg.fail_count = 0
         cfg.last_ok_ts = time.time()
-        cfg.usecase = ""
         return cfg
 
     def test_many(

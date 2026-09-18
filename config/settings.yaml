@@ -83,13 +83,8 @@ testing:
   # Parallel health-watch uses a separate port range / workdir
   watch_socks_base_port: 26000
   watch_xray_workdir: state/runtime/xray-watch
-  watch_hysteria_workdir: state/runtime/hysteria-watch
   xray_bin: bin/xray
   xray_workdir: state/runtime/xray
-  # Real hysteria2 probes (restores Iran-usable hy2 servers without TCP fakes)
-  hysteria_bin: bin/hysteria
-  hysteria_workdir: state/runtime/hysteria
-  hysteria_timeout_sec: 18
 
 publish:
   # GitHub Pages paths (committed under repo root for Pages serving)
@@ -101,7 +96,7 @@ publish:
   by_protocol_dir: by-protocol
   # Strip remarks that look like source attribution
   sanitize_remarks: true
-  # Remarks: ⚡{ping}ms-{n} (simple ping names — usecase labels reverted)
+  # Remarks become ⚡{ping}ms-{n} so clients show lowest ping first visually too
   remark_prefix: "⚡"
   sort_by: latency
 
