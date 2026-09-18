@@ -2,17 +2,20 @@
 
 app:
   name: v2agg
-  # Public-facing channel description (no source / method mentions)
-  channel_description: "Active V2Ray/Xray configs · auto-tested · refreshed regularly"
+  # Public Pages origin (subscription links for Telegram description / index)
+  pages_base_url: "https://alirezaprogrammermaker.github.io"
+  # Short intro line for the Telegram channel description (links + Shamsi time appended in code)
+  channel_description: "کانفیگ‌های فعال V2Ray/Xray · تست خودکار"
 
 pipeline:
   # Max wall time budget before writing checkpoint and exiting cleanly (seconds).
   # GitHub Actions public runners ~6h; leave headroom for publish + Telegram.
   max_runtime_sec: 19800  # 5h 30m
   checkpoint_interval_sec: 120
-  max_configs_to_test_per_run: 800
-  max_healthy_publish: 200
-  max_telegram_post_per_run: 15
+  # More sources → test a larger slice per run (remainder resumes next cron)
+  max_configs_to_test_per_run: 1500
+  max_healthy_publish: 300
+  max_telegram_post_per_run: 20
   best_score_threshold: 40
 
 fetch:
@@ -44,7 +47,7 @@ testing:
   tcp_timeout_sec: 5
   tls_timeout_sec: 8
   xray_timeout_sec: 20
-  concurrency: 16
+  concurrency: 20
   # Latency scoring (ms)
   score_latency_excellent_ms: 400
   score_latency_good_ms: 1200
@@ -74,11 +77,12 @@ telegram:
   post_best: true
   update_description: true
   dry_run: false
+  # Telegram channel description hard limit is 255 chars — keep intro short; code appends Shamsi + URLs
   message_template: |
-    ✅ Active config
-    Protocol: {protocol}
-    Latency: {latency_ms} ms
-    Score: {score}
+    ✅ کانفیگ فعال
+    پروتکل: {protocol}
+    تأخیر: {latency_ms} ms
+    امتیاز: {score}
 
     `{link}`
 
