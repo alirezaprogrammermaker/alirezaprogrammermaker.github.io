@@ -18,6 +18,18 @@ from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
 
+_SOCKS_WARNING_EMITTED = False
+
+
+def socks_proxy_supported() -> bool:
+    """httpx needs the socksio extra to speak SOCKS5 (used for Xray local probes)."""
+    try:
+        import socksio  # noqa: F401
+
+        return True
+    except ImportError:
+        return False
+
 
 def score_latency(latency_ms: float, settings: dict[str, Any]) -> float:
     t = settings.get("testing") or {}
@@ -278,7 +290,17 @@ class XrayProbe:
                     throughput = None
             return latency, throughput
         except Exception as exc:
-            logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
+            global _SOCKS_WARNING_EMITTED
+            # Missing socksio makes EVERY xray probe look "dead" — surface loudly once.
+            if isinstance(exc, ImportError) and "socks" in str(exc).lower():
+                if not _SOCKS_WARNING_EMITTED:
+                    logger.error(
+                        "httpx SOCKS support missing (%s) — install httpx[socks]/socksio or all live probes fail",
+                        exc,
+                    )
+                    _SOCKS_WARNING_EMITTED = True
+            else:
+                logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
             return None, None
         finally:
             if proc and proc.poll() is None:
@@ -320,8 +342,19 @@ class LiveTester:
             timeout_sec=self.xray_timeout,
         )
         self._use_xray = self.mode == "xray" or (self.mode == "auto" and self.xray.available())
+        if self._use_xray and not socks_proxy_supported():
+            logger.error(
+                "Xray binary present but httpx[socks]/socksio is NOT installed — "
+                "SOCKS probes cannot run; refusing fake TCP alives"
+            )
+            # Keep xray mode (don't fall back to TCP fakes); probes will hard-fail until deps fixed
         if self._use_xray:
-            logger.info("live test mode=xray binary=%s accept_tcp_only=%s", self.xray.xray_bin, self.accept_tcp_only)
+            logger.info(
+                "live test mode=xray binary=%s accept_tcp_only=%s socksio=%s",
+                self.xray.xray_bin,
+                self.accept_tcp_only,
+                socks_proxy_supported(),
+            )
         else:
             logger.info("live test mode=tcp/tls (xray unavailable or disabled)")
 
