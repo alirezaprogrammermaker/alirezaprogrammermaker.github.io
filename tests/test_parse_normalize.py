@@ -209,36 +209,20 @@ def test_socks_proxy_supported_helper():
 
 
 def test_classify_usecase_from_real_latency():
-    from v2agg.util.ranking import USECASE_DOWNLOAD, USECASE_GAME, USECASE_WEB, classify_usecase, remark_with_latency
+    from v2agg.util.ranking import remark_with_latency
 
-    settings = {"publish": {"usecase": {"game_max_ms": 150, "web_max_ms": 500, "download_min_kbps": 400}}}
-    game = ProxyConfig(scheme="vless", raw="vless://u@h:1", host="h", port=1, uuid_or_password="u", alive=True, latency_ms=80)
-    web = ProxyConfig(scheme="vless", raw="vless://u@h:2", host="h", port=2, uuid_or_password="u", alive=True, latency_ms=300)
-    dl = ProxyConfig(scheme="vless", raw="vless://u@h:3", host="h", port=3, uuid_or_password="u", alive=True, latency_ms=900)
-    assert classify_usecase(game, settings) == USECASE_GAME
-    assert classify_usecase(web, settings) == USECASE_WEB
-    assert classify_usecase(dl, settings) == USECASE_DOWNLOAD
-    # Mid latency + strong measured throughput → دانلود (real pipe, not random)
-    pipe = ProxyConfig(
+    game = ProxyConfig(
         scheme="vless",
-        raw="vless://u@h:4",
+        raw="vless://u@h:1",
         host="h",
-        port=4,
+        port=1,
         uuid_or_password="u",
         alive=True,
-        latency_ms=320,
-        throughput_kbps=1200,
+        latency_ms=80,
     )
-    assert classify_usecase(pipe, settings) == USECASE_DOWNLOAD
-    # Dead / untested never get a fake tag
-    dead = ProxyConfig(scheme="vless", raw="vless://u@h:5", host="h", port=5, uuid_or_password="u", alive=False, latency_ms=50)
-    assert classify_usecase(dead, settings) == ""
-    game.usecase = USECASE_GAME
-    game.remark = "🇺🇸 US-node"
-    remark = remark_with_latency(game, "⚡", 1, settings=settings)
-    assert "80ms" in remark and USECASE_GAME in remark
-    assert "🇺🇸" in remark
-    assert "·" not in remark  # hyphen separator for client compatibility
+    remark = remark_with_latency(game, "⚡", 1)
+    assert remark == "⚡80ms-1"
+    assert "بازی" not in remark and "وب" not in remark and "دانلود" not in remark
 
 
 def test_rewrite_vmess_updates_ps_and_parses_with_fragment():
@@ -263,7 +247,7 @@ def test_rewrite_vmess_updates_ps_and_parses_with_fragment():
         ).encode()
     ).decode()
     raw = f"vmess://{payload}"
-    out = rewrite_remark(raw, "🇺🇸⚡40ms-بازی-1")
+    out = rewrite_remark(raw, "⚡40ms-1")
     cfg = parse_link(out)
     assert cfg is not None
     assert cfg.host == "1.2.3.4"
@@ -271,6 +255,5 @@ def test_rewrite_vmess_updates_ps_and_parses_with_fragment():
     b64 = out[8:].split("#", 1)[0]
     pad = (-len(b64)) % 4
     obj = json.loads(base64.b64decode(b64 + ("=" * pad)))
-    assert "بازی" in obj["ps"]
-    assert "🇺🇸" in obj["ps"]
+    assert obj["ps"] == "⚡40ms-1"
 

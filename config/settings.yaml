@@ -101,15 +101,9 @@ publish:
   by_protocol_dir: by-protocol
   # Strip remarks that look like source attribution
   sanitize_remarks: true
-  # Remarks: {flag?}⚡{ping}ms-{بازی|وب|دانلود}-{n} from real probe metrics
-  # (hyphen separator — middle-dot broke some clients' share-link parsers)
+  # Remarks: ⚡{ping}ms-{n} (simple ping names — usecase labels reverted)
   remark_prefix: "⚡"
   sort_by: latency
-  usecase:
-    # Real thresholds from measured latency / throughput — never random labels
-    game_max_ms: 150      # بازی — low ping for interactive use
-    web_max_ms: 500       # وب — fine for browsing
-    download_min_kbps: 400  # دانلود — solid pipe (or higher ping bulk use)
 
 telegram:
   # Secrets come from env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHANNEL_ID
@@ -122,7 +116,6 @@ telegram:
   # Telegram channel description hard limit is 255 chars — keep intro short; code appends Shamsi + URLs
   message_template: |
     ✅ کانفیگ فعال
-    کاربرد: {usecase}
     پروتکل: {protocol}
     پینگ: {latency_ms} ms
     امتیاز: {score}

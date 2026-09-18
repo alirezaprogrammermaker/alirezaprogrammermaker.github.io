@@ -10,7 +10,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 from v2agg.models import ProxyConfig, RunMetrics
 from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.logging import get_logger
-from v2agg.util.ranking import classify_usecase, remark_with_latency
+from v2agg.util.ranking import remark_with_latency
 from v2agg.util.timefmt import format_activity_label
 
 logger = get_logger(__name__)
@@ -114,22 +114,12 @@ class TelegramClient:
         remark = remark_with_latency(cfg, "⚡", index, settings=self.settings)
         link = rewrite_remark(cfg.raw, remark)
         safe_link = link.replace("`", "'")
-        tag = cfg.usecase or classify_usecase(cfg, self.settings) or "—"
-        try:
-            text = self.message_template.format(
-                protocol=cfg.scheme.upper(),
-                latency_ms=int(cfg.latency_ms or 0),
-                score=int(cfg.score),
-                link=safe_link,
-                usecase=tag,
-            )
-        except KeyError:
-            text = self.message_template.format(
-                protocol=cfg.scheme.upper(),
-                latency_ms=int(cfg.latency_ms or 0),
-                score=int(cfg.score),
-                link=safe_link,
-            )
+        text = self.message_template.format(
+            protocol=cfg.scheme.upper(),
+            latency_ms=int(cfg.latency_ms or 0),
+            score=int(cfg.score),
+            link=safe_link,
+        )
         return self.send_message(text)
 
     def post_nightly_report(self, metrics: RunMetrics, daily_posted: int) -> bool:

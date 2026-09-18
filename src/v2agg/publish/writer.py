@@ -11,18 +11,13 @@ from v2agg.parse.links import parse_link
 from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
-from v2agg.util.ranking import (
-    USECASE_DOWNLOAD,
-    USECASE_GAME,
-    USECASE_WEB,
-    classify_usecase,
-    remark_with_latency,
-    sort_by_latency,
-)
+from v2agg.util.ranking import remark_with_latency, sort_by_latency
 
 logger = get_logger(__name__)
 
 _MS_RE = re.compile(r"(\d+)\s*ms", re.IGNORECASE)
+# Legacy usecase-label remarks to strip on retag
+_LEGACY_TAG_RE = re.compile(r"(بازی|وب|دانلود)|%D8%A8%D8%A7%D8%B2%DB%8C|%D9%88%D8%A8|%D8%AF%D8%A7%D9%86%D9%84%D9%88%D8%AF")
 
 
 class Publisher:
@@ -54,7 +49,7 @@ class Publisher:
         return links
 
     def load_public_configs(self) -> list[ProxyConfig]:
-        """Parse current subs/all.txt into configs (best-effort latency/usecase from remark)."""
+        """Parse current subs/all.txt into configs (best-effort latency from remark)."""
         path = self.output_dir / self.all_file
         if not path.is_file():
             return []
@@ -69,30 +64,24 @@ class Publisher:
                 continue
             remark = unquote(line.rsplit("#", 1)[-1]) if "#" in line else (cfg.remark or "")
             cfg.remark = remark
+            cfg.usecase = ""
             m = _MS_RE.search(remark)
             if m:
                 cfg.latency_ms = float(m.group(1))
                 cfg.alive = True
                 cfg.score = max(cfg.score, 50.0)
-            if USECASE_GAME in remark:
-                cfg.usecase = USECASE_GAME
-            elif USECASE_WEB in remark:
-                cfg.usecase = USECASE_WEB
-            elif USECASE_DOWNLOAD in remark:
-                cfg.usecase = USECASE_DOWNLOAD
-            elif cfg.alive:
-                cfg.usecase = classify_usecase(cfg, self.settings)
             out.append(cfg)
         return out
 
     def needs_remark_retag(self) -> bool:
-        """True if public list still uses broken middle-dot remarks or vmess ps mismatch."""
+        """True if public list still has legacy usecase/middle-dot remarks."""
         path = self.output_dir / self.all_file
         if not path.is_file() or path.stat().st_size == 0:
             return False
         text = path.read_text(encoding="utf-8", errors="ignore")
-        # Middle-dot separator broke some clients after usecase labels
         if "·" in text or "%C2%B7" in text:
+            return True
+        if _LEGACY_TAG_RE.search(text):
             return True
         return False
 
