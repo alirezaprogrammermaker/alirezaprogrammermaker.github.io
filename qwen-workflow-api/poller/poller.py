@@ -69,7 +69,8 @@ def _extract_content(stdout: str, stderr: str) -> str:
     )
     skip_exact = {
         "Create Video", "Edit", "Create Image", "Share", "Copy",
-        "Regenerate", "Retry", "Retry...", "Skip",
+        "Regenerate", "Retry", "Retry...", "Retry send...", "Skip",
+        "Sending...",
     }
     lines = []
     for ln in (stdout or "").splitlines():
