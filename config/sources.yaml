@@ -3,28 +3,130 @@
 # then validated and live-tested. Never attribute sources in public output.
 
 sources:
-  # Public aggregator-style raw subscription endpoints commonly used in OSS demos.
-  # Replace or extend freely. Broken URLs are skipped and counted in metrics.
-  - id: free-sub-1
-    url: https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
+  # Large multi-protocol pools
+  - id: epodonios-all
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt
     enabled: true
-    timeout_sec: 30
+    timeout_sec: 45
     weight: 1
 
-  - id: free-sub-2
-    url: https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt
+  - id: epodonios-sub1
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub1.txt
     enabled: true
-    timeout_sec: 30
+    timeout_sec: 40
     weight: 1
 
-  - id: free-sub-3
+  - id: solispirit-all
+    url: https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/all_configs.txt
+    enabled: true
+    timeout_sec: 45
+    weight: 1
+
+  - id: mahdibland-merge
     url: https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge_base64.txt
     enabled: true
     timeout_sec: 45
     weight: 1
 
-  - id: free-sub-4
+  - id: peasoft-nomorewalls
+    url: https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: pawdroid-free
     url: https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: freefq
+    url: https://raw.githubusercontent.com/freefq/free/master/v2
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: leon406-vless
+    url: https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/vless
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: leon406-ss
+    url: https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/ss
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: surfboard-converted
+    url: https://raw.githubusercontent.com/Surfboardv2ray/Proxy-sorter/main/output/converted.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: ermaozi-subscribe
+    url: https://raw.githubusercontent.com/ermaozi/get_subscribe/main/subscribe/v2ray.txt
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: awesome-vpn
+    url: https://raw.githubusercontent.com/awesome-vpn/awesome-vpn/master/all
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: free18
+    url: https://raw.githubusercontent.com/free18/v2ray/master/v.txt
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: azadnet
+    url: https://raw.githubusercontent.com/AzadNetCH/Clash/main/AzadNet.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: ts-sf-fly
+    url: https://raw.githubusercontent.com/ts-sf/fly/main/v2
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: ripaojiedian
+    url: https://raw.githubusercontent.com/ripaojiedian/freenode/main/sub
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: w177-long1
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription1
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long2
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription2
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long3
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription3
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: learnhard-free
+    url: https://raw.githubusercontent.com/learnhard-cn/free_proxy_ss/main/free
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  # Kept from PR #4 baseline
+  - id: mfuu-v2ray
+    url: https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
     enabled: true
     timeout_sec: 30
     weight: 1
