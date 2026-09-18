@@ -28,6 +28,7 @@ def test_parse_vmess():
                 "host": "example.com",
                 "path": "/ray",
                 "tls": "tls",
+                "sni": "sni.example.com",
             }
         ).encode()
     ).decode()
@@ -38,20 +39,41 @@ def test_parse_vmess():
     assert cfg.host == "1.2.3.4"
     assert cfg.port == 443
     assert cfg.network == "ws"
+    assert cfg.security == "tls"
+    assert cfg.sni == "sni.example.com"
+    assert cfg.extra.get("host") == "example.com"
     assert cfg.ensure_fingerprint()
+
+
+def test_parse_vmess_tls_bool():
+    payload = base64.b64encode(
+        json.dumps(
+            {
+                "add": "9.9.9.9",
+                "port": 443,
+                "id": "11111111-2222-3333-4444-555555555555",
+                "net": "tcp",
+                "tls": True,
+            }
+        ).encode()
+    ).decode()
+    cfg = parse_link(f"vmess://{payload}")
+    assert cfg is not None
+    assert cfg.security == "tls"
 
 
 def test_parse_vless():
     link = (
         "vless://11111111-2222-3333-4444-555555555555@example.com:443"
-        "?encryption=none&security=tls&type=ws&path=%2Fpath&sni=example.com#MyNode"
+        "?encryption=none&security=tls&type=ws&path=%2Fpath&sni=sni.example.com&host=cdn.example.com#MyNode"
     )
     cfg = parse_link(link)
     assert cfg is not None
     assert cfg.scheme == "vless"
     assert cfg.host == "example.com"
     assert cfg.port == 443
-    assert cfg.sni == "example.com"
+    assert cfg.sni == "sni.example.com"
+    assert cfg.extra.get("host") == "cdn.example.com"
 
 
 def test_parse_trojan():
@@ -166,7 +188,7 @@ def test_no_tcp_fake_alive_for_hysteria_when_xray_mode():
     # Force xray path even if binary missing: patch available()
     tester = LiveTester(settings)
     tester._use_xray = True  # type: ignore[attr-defined]
-    tester.xray.probe = lambda cfg, port: None  # type: ignore[method-assign]
+    tester.xray.probe = lambda cfg, port: (None, None)  # type: ignore[method-assign]
     cfg = ProxyConfig(
         scheme="hysteria2",
         raw="hysteria2://p@1.2.3.4:443?sni=x",
@@ -177,4 +199,34 @@ def test_no_tcp_fake_alive_for_hysteria_when_xray_mode():
     cfg.ensure_fingerprint()
     out = tester.test_one(cfg)
     assert out.alive is False
+
+
+def test_classify_usecase_from_real_latency():
+    from v2agg.util.ranking import USECASE_DOWNLOAD, USECASE_GAME, USECASE_WEB, classify_usecase, remark_with_latency
+
+    settings = {"publish": {"usecase": {"game_max_ms": 150, "web_max_ms": 500, "download_min_kbps": 400}}}
+    game = ProxyConfig(scheme="vless", raw="vless://u@h:1", host="h", port=1, uuid_or_password="u", alive=True, latency_ms=80)
+    web = ProxyConfig(scheme="vless", raw="vless://u@h:2", host="h", port=2, uuid_or_password="u", alive=True, latency_ms=300)
+    dl = ProxyConfig(scheme="vless", raw="vless://u@h:3", host="h", port=3, uuid_or_password="u", alive=True, latency_ms=900)
+    assert classify_usecase(game, settings) == USECASE_GAME
+    assert classify_usecase(web, settings) == USECASE_WEB
+    assert classify_usecase(dl, settings) == USECASE_DOWNLOAD
+    # Mid latency + strong measured throughput → دانلود (real pipe, not random)
+    pipe = ProxyConfig(
+        scheme="vless",
+        raw="vless://u@h:4",
+        host="h",
+        port=4,
+        uuid_or_password="u",
+        alive=True,
+        latency_ms=320,
+        throughput_kbps=1200,
+    )
+    assert classify_usecase(pipe, settings) == USECASE_DOWNLOAD
+    # Dead / untested never get a fake tag
+    dead = ProxyConfig(scheme="vless", raw="vless://u@h:5", host="h", port=5, uuid_or_password="u", alive=False, latency_ms=50)
+    assert classify_usecase(dead, settings) == ""
+    game.usecase = USECASE_GAME
+    remark = remark_with_latency(game, "⚡", 1, settings=settings)
+    assert "80ms" in remark and USECASE_GAME in remark
 

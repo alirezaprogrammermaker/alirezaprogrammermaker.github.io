@@ -18,6 +18,7 @@ class Publisher:
 
     def __init__(self, settings: dict[str, Any]) -> None:
         pub = settings.get("publish") or {}
+        self.settings = settings
         self.output_dir = Path(pub.get("output_dir") or "subs")
         self.all_file = pub.get("all_file") or "all.txt"
         self.all_b64 = pub.get("all_base64_file") or "all.base64"
@@ -34,7 +35,7 @@ class Publisher:
         links: list[str] = []
         for i, cfg in enumerate(configs, start=1):
             if self.sanitize:
-                remark = remark_with_latency(cfg, self.remark_prefix, i)
+                remark = remark_with_latency(cfg, self.remark_prefix, i, settings=self.settings)
             else:
                 remark = cfg.remark or f"{self.remark_prefix}{i}"
             links.append(rewrite_remark(cfg.raw, remark))

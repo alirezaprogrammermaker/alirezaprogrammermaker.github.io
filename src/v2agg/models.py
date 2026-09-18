@@ -49,6 +49,7 @@ class ProxyConfig:
 
     # Runtime / health fields (not part of outbound identity)
     latency_ms: float | None = None
+    throughput_kbps: float | None = None
     score: float = 0.0
     alive: bool = False
     fail_count: int = 0
@@ -56,6 +57,7 @@ class ProxyConfig:
     last_test_ts: float | None = None
     first_seen_ts: float | None = None
     source_id: str = ""  # internal only — never published
+    usecase: str = ""  # بازی | وب | دانلود — derived from real probe metrics
 
     def ensure_fingerprint(self) -> str:
         if self.fingerprint:

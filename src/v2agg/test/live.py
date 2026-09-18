@@ -13,6 +13,7 @@ from typing import Any, Callable
 import httpx
 
 from v2agg.models import ProxyConfig
+from v2agg.util.ranking import classify_usecase
 from v2agg.util.logging import get_logger
 
 logger = get_logger(__name__)
@@ -166,25 +167,52 @@ def build_xray_config(cfg: ProxyConfig, local_port: int) -> dict[str, Any] | Non
 
 def _stream_settings(cfg: ProxyConfig) -> dict[str, Any]:
     network = (cfg.network or "tcp").lower()
+    if network in {"", "none"}:
+        network = "tcp"
     security = (cfg.security or "").lower()
-    stream: dict[str, Any] = {"network": network if network else "tcp"}
+    stream: dict[str, Any] = {"network": network}
+    host_header = str(cfg.extra.get("host") or cfg.sni or cfg.host or "")
     if security in {"tls", "xtls", "reality"}:
         stream["security"] = "tls" if security != "reality" else "reality"
-        tls: dict[str, Any] = {"serverName": cfg.sni or cfg.host, "allowInsecure": True}
         if stream["security"] == "reality":
-            tls = {
+            stream["realitySettings"] = {
                 "serverName": cfg.sni or cfg.host,
                 "fingerprint": cfg.extra.get("fp") or "chrome",
                 "publicKey": cfg.extra.get("pbk") or "",
                 "shortId": cfg.extra.get("sid") or "",
+                "spiderX": cfg.extra.get("spx") or "",
             }
-            stream["realitySettings"] = tls
         else:
-            stream["tlsSettings"] = tls
+            stream["tlsSettings"] = {
+                "serverName": cfg.sni or host_header or cfg.host,
+                "allowInsecure": True,
+                "fingerprint": cfg.extra.get("fp") or "chrome",
+                "alpn": ["h2", "http/1.1"],
+            }
     if network == "ws":
-        stream["wsSettings"] = {"path": cfg.path or "/", "headers": {"Host": cfg.sni or cfg.host}}
-    elif network == "grpc":
-        stream["grpcSettings"] = {"serviceName": cfg.path or cfg.extra.get("serviceName") or ""}
+        stream["wsSettings"] = {
+            "path": cfg.path or cfg.extra.get("path") or "/",
+            "headers": {"Host": host_header or cfg.host},
+        }
+    elif network in {"grpc", "gun"}:
+        stream["network"] = "grpc"
+        stream["grpcSettings"] = {
+            "serviceName": cfg.path or cfg.extra.get("serviceName") or cfg.extra.get("servicename") or ""
+        }
+    elif network == "h2":
+        stream["httpSettings"] = {
+            "path": cfg.path or "/",
+            "host": [host_header] if host_header else [cfg.host],
+        }
+    elif network == "httpupgrade":
+        stream["httpupgradeSettings"] = {
+            "path": cfg.path or "/",
+            "host": host_header or cfg.host,
+        }
+    elif network == "splithttp" or network == "xhttp":
+        stream["network"] = "xhttp" if network == "xhttp" else network
+        key = "xhttpSettings" if network == "xhttp" else "splithttpSettings"
+        stream[key] = {"path": cfg.path or "/", "host": host_header or cfg.host}
     return stream
 
 
@@ -201,10 +229,11 @@ class XrayProbe:
             return True
         return shutil.which(self.xray_bin) is not None
 
-    def probe(self, cfg: ProxyConfig, local_port: int) -> float | None:
+    def probe(self, cfg: ProxyConfig, local_port: int) -> tuple[float | None, float | None]:
+        """Return (latency_ms, throughput_kbps). Either may be None."""
         conf = build_xray_config(cfg, local_port)
         if conf is None:
-            return None
+            return None, None
         conf_path = self.workdir / f"cfg-{local_port}.json"
         conf_path.write_text(json.dumps(conf), encoding="utf-8")
         proc: subprocess.Popen[bytes] | None = None
@@ -214,25 +243,43 @@ class XrayProbe:
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
-            # Give xray a moment to bind
-            time.sleep(0.35)
+            # Give xray time to bind (busy runners need a bit more)
+            time.sleep(0.55)
             if proc.poll() is not None:
-                return None
+                time.sleep(0.35)
+                if proc.poll() is not None:
+                    return None, None
             proxy = f"socks5://127.0.0.1:{local_port}"
-            t0 = time.monotonic()
+            latency: float | None = None
+            throughput: float | None = None
             with httpx.Client(
                 proxy=proxy,
                 timeout=self.timeout_sec,
                 follow_redirects=True,
                 verify=False,
             ) as client:
+                t0 = time.monotonic()
                 resp = client.get(self.probe_url)
                 if resp.status_code >= 500:
-                    return None
-            return (time.monotonic() - t0) * 1000
+                    return None, None
+                latency = (time.monotonic() - t0) * 1000
+                # Real throughput sample (~100 KiB) for download suitability.
+                # Short timeout so a hung speed test never stalls the worker pool.
+                try:
+                    t1 = time.monotonic()
+                    dl = client.get(
+                        "https://speed.cloudflare.com/__down?bytes=102400",
+                        timeout=min(6.0, float(self.timeout_sec)),
+                    )
+                    elapsed = max(time.monotonic() - t1, 0.001)
+                    if dl.status_code < 500 and dl.content:
+                        throughput = (len(dl.content) * 8 / 1000.0) / elapsed  # kbps
+                except Exception:
+                    throughput = None
+            return latency, throughput
         except Exception as exc:
             logger.debug("xray probe fail fp=%s err=%s", cfg.fingerprint, exc)
-            return None
+            return None, None
         finally:
             if proc and proc.poll() is None:
                 proc.terminate()
@@ -302,11 +349,12 @@ class LiveTester:
     def test_one(self, cfg: ProxyConfig, worker_idx: int = 0) -> ProxyConfig:
         cfg.last_test_ts = time.time()
         latency: float | None = None
+        throughput: float | None = None
         scheme = (cfg.scheme or "").lower()
 
         if self._use_xray and scheme in self.XRAY_SCHEMES:
             local_port = self.local_base + (worker_idx % 5000)
-            latency = self.xray.probe(cfg, local_port)
+            latency, throughput = self.xray.probe(cfg, local_port)
         elif scheme in self.HTTPX_PROXY_SCHEMES:
             latency = self._httpx_proxy_probe(cfg)
         elif self._use_xray and scheme not in self.XRAY_SCHEMES:
@@ -329,15 +377,19 @@ class LiveTester:
         if latency is None:
             cfg.alive = False
             cfg.latency_ms = None
+            cfg.throughput_kbps = None
+            cfg.usecase = ""
             cfg.score = 0.0
             cfg.fail_count += 1
             return cfg
 
         cfg.alive = True
         cfg.latency_ms = latency
+        cfg.throughput_kbps = throughput
         cfg.score = score_latency(latency, self.settings)
         cfg.fail_count = 0
         cfg.last_ok_ts = time.time()
+        cfg.usecase = classify_usecase(cfg, self.settings)
         return cfg
 
     def test_many(
