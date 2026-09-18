@@ -3,7 +3,6 @@
 # then validated and live-tested. Never attribute sources in public output.
 
 sources:
-  # Large multi-protocol pools
   - id: epodonios-all
     url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/All_Configs_Sub.txt
     enabled: true
@@ -124,14 +123,138 @@ sources:
     timeout_sec: 30
     weight: 1
 
-  # Kept from PR #4 baseline
   - id: mfuu-v2ray
     url: https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
     enabled: true
     timeout_sec: 30
     weight: 1
 
-  # Example placeholder — set enabled: true after replacing the URL
+  - id: epodonios-sub2
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub2.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub3
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub3.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub4
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub4.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub5
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub5.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub6
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub6.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub7
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub7.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: epodonios-sub8
+    url: https://raw.githubusercontent.com/Epodonios/v2ray-configs/main/Sub8.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: solispirit-vless
+    url: https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Protocols/vless.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: solispirit-vmess
+    url: https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Protocols/vmess.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: solispirit-trojan
+    url: https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Protocols/trojan.txt
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: solispirit-ss
+    url: https://raw.githubusercontent.com/SoliSpirit/v2ray-configs/main/Protocols/ss.txt
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: mahdibland-jsdelivr
+    url: https://cdn.jsdelivr.net/gh/mahdibland/V2RayAggregator@master/sub/sub_merge.txt
+    enabled: true
+    timeout_sec: 45
+    weight: 1
+
+  - id: peasoft-list-raw
+    url: https://cdn.jsdelivr.net/gh/peasoft/NoMoreWalls@master/list_raw.txt
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: leon406-hysteria2
+    url: https://raw.githubusercontent.com/Leon406/SubCrawler/main/sub/share/hysteria2
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: aliilapro
+    url: https://raw.githubusercontent.com/ALIILAPRO/v2rayNG-Config/main/sub.txt
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: mheidari98
+    url: https://raw.githubusercontent.com/mheidari98/.proxy/refs/heads/main/all
+    enabled: true
+    timeout_sec: 40
+    weight: 1
+
+  - id: w177-long4
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription4
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long5
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription5
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long6
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription6
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long7
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription7
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
+  - id: w177-long8
+    url: https://raw.githubusercontent.com/w1770946466/Auto_proxy/main/Long_term_subscription8
+    enabled: true
+    timeout_sec: 35
+    weight: 1
+
   - id: custom-example
     url: https://example.com/path/to/subscription.txt
     enabled: false
