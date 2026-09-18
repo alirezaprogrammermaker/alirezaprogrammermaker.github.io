@@ -116,14 +116,34 @@ class Pipeline:
     def _commit_healthy(self, healthy: list[ProxyConfig], *, reason: str) -> list[ProxyConfig]:
         """Persist + publish (+ optional git push). Caller should hold lock when merging state."""
         fresh = self._filter_fresh_healthy(healthy)
+        # Always refresh usecase from current metrics (latency/throughput may have changed)
+        from v2agg.util.ranking import classify_usecase
+
+        for c in fresh:
+            if c.alive:
+                c.usecase = classify_usecase(c, self.settings)
         self.store.save_healthy(fresh)
+
+        # Never wipe a non-empty public list with an empty publish mid-run
+        # (health-watch can clear fakes before discovery finds real proxies).
+        existing_all = self.publisher.output_dir / self.publisher.all_file
+        had_public = existing_all.is_file() and existing_all.stat().st_size > 0
+        if not fresh and had_public and reason not in {"shutdown", "force-empty"}:
+            logger.warning(
+                "skip empty publish reason=%s — keeping previous subs/ until real proxies found",
+                reason,
+            )
+            return fresh
+
         self.publisher.publish(fresh)
         logger.info("list updated reason=%s alive=%d", reason, len(fresh))
-        if self.git_publish:
+        if self.git_publish and fresh:
+            push_subs_if_changed()
+        elif self.git_publish and not fresh and reason in {"shutdown", "force-empty"}:
             push_subs_if_changed()
         # Throttle channel description updates (at most every ~2 min)
         now = time.monotonic()
-        if now - self._last_desc_ts >= min(self.health_watch_interval, 120):
+        if fresh and now - self._last_desc_ts >= min(self.health_watch_interval, 120):
             try:
                 self.telegram.update_description(
                     last_activity=format_activity_label(),
@@ -168,11 +188,20 @@ class Pipeline:
 
     def _health_watch_loop(self) -> None:
         logger.info("health-watch started interval=%ss", int(self.health_watch_interval))
-        # Immediate first pass so stale list is cleaned ASAP at job start
-        try:
-            self._health_watch_once()
-        except Exception as exc:
-            logger.warning("health-watch initial pass failed: %s", type(exc).__name__)
+        # If we already have a healthy list, clean fakes immediately.
+        # If empty, give discovery ~90s head start so we don't spin-clean while seeding.
+        with self._lock:
+            has_list = bool(self.store.load_healthy())
+        if has_list:
+            try:
+                self._health_watch_once()
+            except Exception as exc:
+                logger.warning("health-watch initial pass failed: %s", type(exc).__name__)
+        else:
+            logger.info("health-watch: empty list — waiting for discovery to seed first")
+            if self._stop_watch.wait(min(90.0, self.health_watch_interval)):
+                logger.info("health-watch stopped")
+                return
         while not self._should_stop():
             t0 = time.monotonic()
             try:
@@ -225,9 +254,20 @@ class Pipeline:
             if fp not in seen:
                 candidates.append(c)
                 seen.add(fp)
+        # Probe Xray-verifiable schemes first (vmess/vless/trojan/ss) — real quality
+        from v2agg.test.live import LiveTester
+
+        xray_schemes = LiveTester.XRAY_SCHEMES
+        preferred = [c for c in candidates if c.scheme.lower() in xray_schemes]
+        other = [c for c in candidates if c.scheme.lower() not in xray_schemes]
+        candidates = preferred + other
         metrics.after_dedup = len(candidates)
         batch = candidates[: self.max_test]
-        logger.info("discovery cycle queue=%d (newish focus)", len(batch))
+        logger.info(
+            "discovery cycle queue=%d (xray_schemes=%d)",
+            len(batch),
+            sum(1 for c in batch if c.scheme.lower() in xray_schemes),
+        )
         if not batch:
             return
 

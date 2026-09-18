@@ -127,3 +127,41 @@ logging:
     stored = pipe.store.load_healthy()
     assert len(stored) == 1
     assert stored[0].host == "10.0.0.1"
+
+
+def test_skip_empty_publish_keeps_previous_subs(tmp_path: Path):
+    settings = tmp_path / "settings.yaml"
+    sources = tmp_path / "sources.yaml"
+    subs = tmp_path / "subs"
+    subs.mkdir()
+    (subs / "all.txt").write_text("vless://keep-me@h:1#old\n", encoding="utf-8")
+    settings.write_text(
+        f"""
+app: {{pages_base_url: "https://example.test"}}
+pipeline:
+  continuous: false
+  healthy_max_age_hours: 24
+  git_publish: false
+state:
+  dir: {tmp_path / "state"}
+  checkpoint_file: checkpoint.json
+  metrics_file: metrics.json
+  healthy_db_file: healthy.json
+publish:
+  output_dir: {subs}
+  all_file: all.txt
+testing:
+  mode: tcp
+telegram:
+  dry_run: true
+logging:
+  level: WARNING
+""",
+        encoding="utf-8",
+    )
+    sources.write_text("sources: []\n", encoding="utf-8")
+    pipe = Pipeline(settings, sources, mode="publish-only", dry_run_telegram=True)
+    # Mid-run empty commit must not wipe existing public list
+    out = pipe._commit_healthy([], reason="health-watch")
+    assert out == []
+    assert (subs / "all.txt").read_text(encoding="utf-8").startswith("vless://keep-me")

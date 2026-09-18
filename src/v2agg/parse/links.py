@@ -65,6 +65,18 @@ def _b64json(payload: str) -> dict | None:
         return None
 
 
+def _vmess_security(tls_val: object) -> str:
+    """Normalize vmess `tls` field (bool / string) to xray security name."""
+    if isinstance(tls_val, bool):
+        return "tls" if tls_val else ""
+    s = str(tls_val or "").strip().lower()
+    if s in {"1", "true", "yes", "on"}:
+        return "tls"
+    if s in {"", "0", "false", "no", "none", "off"}:
+        return ""
+    return s
+
+
 def parse_vmess(link: str) -> ProxyConfig | None:
     if not link.lower().startswith("vmess://"):
         return None
@@ -88,10 +100,18 @@ def parse_vmess(link: str) -> ProxyConfig | None:
         uuid_or_password=uuid,
         remark=str(obj.get("ps") or ""),
         network=str(obj.get("net") or ""),
-        security=str(obj.get("tls") or ""),
+        security=_vmess_security(obj.get("tls")),
         sni=str(obj.get("sni") or obj.get("host") or ""),
         path=str(obj.get("path") or ""),
-        extra={"aid": obj.get("aid"), "type": obj.get("type"), "v": obj.get("v")},
+        extra={
+            "aid": obj.get("aid"),
+            "type": obj.get("type"),
+            "v": obj.get("v"),
+            # WS/HTTP Host header — must stay separate from server address / SNI
+            "host": obj.get("host") or "",
+            "fp": obj.get("fp") or "",
+            "alpn": obj.get("alpn") or "",
+        },
     )
     cfg.ensure_fingerprint()
     return cfg
@@ -220,8 +240,12 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
 
     net = qs.get("type") or qs.get("network") or ""
     security = qs.get("security") or qs.get("tls") or ""
-    sni = qs.get("sni") or qs.get("peer") or qs.get("host") or ""
+    sni = qs.get("sni") or qs.get("peer") or ""
     path = qs.get("path") or ""
+    # Keep WS/HTTP Host header distinct from SNI (CDN setups often differ)
+    host_header = qs.get("host") or ""
+    if not sni and host_header:
+        sni = host_header
 
     normalized_scheme = _normalize_scheme(want if want != "hy2" else "hysteria2")
     if want in {"hy2", "hysteria2"}:
@@ -232,6 +256,14 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
         normalized_scheme = "socks"
     if want in {"http", "https"}:
         normalized_scheme = "http"
+
+    extra = {
+        k: v
+        for k, v in qs.items()
+        if k not in {"type", "network", "security", "tls", "sni", "peer", "path"}
+    }
+    if host_header:
+        extra["host"] = host_header
 
     cfg = ProxyConfig(
         scheme=normalized_scheme,
@@ -244,11 +276,7 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
         security=security,
         sni=sni,
         path=path,
-        extra={
-            k: v
-            for k, v in qs.items()
-            if k not in {"type", "network", "security", "tls", "sni", "peer", "host", "path"}
-        },
+        extra=extra,
     )
     cfg.ensure_fingerprint()
     return cfg
