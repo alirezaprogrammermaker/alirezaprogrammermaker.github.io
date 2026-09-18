@@ -234,6 +234,43 @@ def test_classify_usecase_from_real_latency():
     dead = ProxyConfig(scheme="vless", raw="vless://u@h:5", host="h", port=5, uuid_or_password="u", alive=False, latency_ms=50)
     assert classify_usecase(dead, settings) == ""
     game.usecase = USECASE_GAME
+    game.remark = "🇺🇸 US-node"
     remark = remark_with_latency(game, "⚡", 1, settings=settings)
     assert "80ms" in remark and USECASE_GAME in remark
+    assert "🇺🇸" in remark
+    assert "·" not in remark  # hyphen separator for client compatibility
+
+
+def test_rewrite_vmess_updates_ps_and_parses_with_fragment():
+    import base64
+    import json
+
+    from v2agg.parse.links import parse_link
+    from v2agg.parse.normalize import rewrite_remark
+
+    payload = base64.b64encode(
+        json.dumps(
+            {
+                "v": "2",
+                "ps": "old",
+                "add": "1.2.3.4",
+                "port": "443",
+                "id": "11111111-2222-3333-4444-555555555555",
+                "aid": "0",
+                "net": "tcp",
+                "tls": "",
+            }
+        ).encode()
+    ).decode()
+    raw = f"vmess://{payload}"
+    out = rewrite_remark(raw, "🇺🇸⚡40ms-بازی-1")
+    cfg = parse_link(out)
+    assert cfg is not None
+    assert cfg.host == "1.2.3.4"
+    # ps inside JSON must carry the display name
+    b64 = out[8:].split("#", 1)[0]
+    pad = (-len(b64)) % 4
+    obj = json.loads(base64.b64decode(b64 + ("=" * pad)))
+    assert "بازی" in obj["ps"]
+    assert "🇺🇸" in obj["ps"]
 
