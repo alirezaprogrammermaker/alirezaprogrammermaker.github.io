@@ -1,0 +1,93 @@
+name: Nightly report
+
+# Nightly summary to Telegram + refresh pass (same resume model as refresh.yml).
+
+on:
+  schedule:
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: v2agg-nightly
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Install Xray-core
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq unzip curl
+          bash scripts/install-xray.sh
+          echo "${{ github.workspace }}/bin" >> "$GITHUB_PATH"
+
+      - name: Restore state cache
+        uses: actions/cache/restore@v4
+        with:
+          path: state
+          key: v2agg-state-${{ github.run_id }}
+          restore-keys: |
+            v2agg-state-
+
+      - name: Restore previous checkpoint artifact
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          name: v2agg-checkpoint
+          workflow: refresh.yml
+          workflow_conclusion: completed
+          path: state
+          search_artifacts: true
+          if_no_artifact_found: warn
+        continue-on-error: true
+
+      - name: Run nightly pipeline
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+        run: |
+          export PATH="${GITHUB_WORKSPACE}/bin:${PATH}"
+          python -m v2agg --mode nightly --print-metrics
+
+      - name: Upload state artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2agg-checkpoint
+          path: |
+            state/checkpoint.json
+            state/healthy.json
+            state/metrics.json
+            state/daily.json
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Save state cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: state
+          key: v2agg-state-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Commit & push subscription files
+        run: bash scripts/publish-subs.sh

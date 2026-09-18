@@ -1,0 +1,37 @@
+# Subscription sources — add URLs here; no code changes needed.
+# Each entry is fetched, decoded (plain or base64), parsed into share links,
+# then validated and live-tested. Never attribute sources in public output.
+
+sources:
+  # Public aggregator-style raw subscription endpoints commonly used in OSS demos.
+  # Replace or extend freely. Broken URLs are skipped and counted in metrics.
+  - id: free-sub-1
+    url: https://raw.githubusercontent.com/mfuu/v2ray/master/v2ray
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: free-sub-2
+    url: https://raw.githubusercontent.com/peasoft/NoMoreWalls/master/list.txt
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  - id: free-sub-3
+    url: https://raw.githubusercontent.com/mahdibland/V2RayAggregator/master/sub/sub_merge_base64.txt
+    enabled: true
+    timeout_sec: 45
+    weight: 1
+
+  - id: free-sub-4
+    url: https://raw.githubusercontent.com/Pawdroid/Free-servers/main/sub
+    enabled: true
+    timeout_sec: 30
+    weight: 1
+
+  # Example placeholder — set enabled: true after replacing the URL
+  - id: custom-example
+    url: https://example.com/path/to/subscription.txt
+    enabled: false
+    timeout_sec: 30
+    weight: 1

@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*~
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Secrets & local overrides
+secrets/
+*.pem
+*.key
+config/local*.yaml
+config/local*.yml
+
+# Ephemeral runtime state (persisted via Actions artifacts)
+state/checkpoint.json
+state/metrics.json
+state/runtime/
+*.log
+
+# Downloaded binaries
+bin/
+xray
+xray.exe
+geoip.dat
+geosite.dat
+
+# Local dry-run outputs
+out/
+tmp/
