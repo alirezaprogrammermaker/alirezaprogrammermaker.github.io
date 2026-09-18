@@ -347,17 +347,26 @@ class QwenClient:
             raise last_err
 
     async def is_logged_in(self) -> bool:
-        """Check if the session is logged in. Polls up to 15s for slow hydration."""
+        """Check if the session is logged in. Polls up to 15s for slow hydration.
+
+        Guest mode also shows the composer textarea + Log in/Sign up — textarea
+        alone must NOT count as logged in (that was treating guest as logged-in
+        and then Enter-to-send hung for minutes).
+        """
         check_js = r"""() => {
-            const btn = document.querySelector('button.user-menu-btn');
-            if (btn && btn.offsetParent !== null) return 'yes';
-            if (document.querySelector('a.chat-item-drag-link, a[aria-label="chat-item"]')) return 'yes';
-            if (document.querySelector('textarea.message-input-textarea')) return 'yes';
-            const loginBtn = Array.from(document.querySelectorAll('button')).find(b => {
+            const visible = (el) => !!(el && el.offsetParent !== null);
+            const btns = Array.from(document.querySelectorAll('button, a'));
+            const hasAuthCta = btns.some(b => {
                 const t = (b.textContent || '').trim();
-                return t === 'Log in' || t === 'Sign in';
+                return visible(b) && (t === 'Log in' || t === 'Sign in' || t === 'Sign up'
+                    || t === 'ورود' || t === 'ثبت نام');
             });
-            if (loginBtn && loginBtn.offsetParent !== null) return 'no';
+            if (hasAuthCta) return 'no';
+            const menu = document.querySelector('button.user-menu-btn');
+            if (visible(menu)) return 'yes';
+            if (document.querySelector('a.chat-item-drag-link, a[aria-label="chat-item"]')) return 'yes';
+            // Avatar / account chip used by newer Qwen Studio UI
+            if (document.querySelector('[class*="user-info"], [class*="avatar"][class*="user"]')) return 'yes';
             return 'pending';
         }"""
         try:
@@ -371,7 +380,7 @@ class QwenClient:
                     return False
 
             await self._goto_resilient(QWEN_CHAT_URL, timeout=DEFAULT_TIMEOUT)
-            deadline = time.time() + 12
+            deadline = time.time() + 8
             while time.time() < deadline:
                 if "/auth" in self.page.url:
                     return False
@@ -380,7 +389,7 @@ class QwenClient:
                     return True
                 if result == "no":
                     return False
-                await self.page.wait_for_timeout(300)
+                await self.page.wait_for_timeout(200)
             return False
         except Exception:
             return False
@@ -757,7 +766,7 @@ class QwenClient:
             pass
         try:
             await self.page.wait_for_selector(
-                ".chat-detail-skeleton", state="hidden", timeout=8000
+                ".chat-detail-skeleton", state="hidden", timeout=2000
             )
         except Exception:
             pass
@@ -951,13 +960,41 @@ class QwenClient:
 
     # ── Message Sending ───────────────────────────────────────────────────
 
+    async def _click_send_button(self) -> bool:
+        """Click the composer Send control (Enter is unreliable on guest/studio UI)."""
+        try:
+            clicked = await self.page.evaluate(r"""() => {
+                const visible = (el) => !!(el && el.offsetParent !== null);
+                const nodes = Array.from(document.querySelectorAll('button, [role=button]'));
+                const score = (el) => {
+                    const al = (el.getAttribute('aria-label') || '').toLowerCase();
+                    const t = (el.textContent || '').trim().toLowerCase();
+                    if (al === 'send' || al.includes('send message')) return 3;
+                    if (t === 'send' || t === 'ارسال') return 2;
+                    if (al.includes('send')) return 1;
+                    return 0;
+                };
+                let best = null, bestScore = 0;
+                for (const el of nodes) {
+                    if (!visible(el) || el.disabled) continue;
+                    const s = score(el);
+                    if (s > bestScore) { best = el; bestScore = s; }
+                }
+                if (!best) return null;
+                best.click();
+                return best.getAttribute('aria-label') || (best.textContent || '').trim() || 'send';
+            }""")
+            return bool(clicked)
+        except Exception:
+            return False
+
     async def send_message(self, message: str) -> str:
         """Send a message and wait for the response. Supports Ctrl+C to stop."""
         if not self.page:
             raise RuntimeError("Browser not started")
         if "/auth" in self.page.url:
             await self.page.goto(QWEN_CHAT_URL, wait_until="domcontentloaded")
-            await self.page.wait_for_timeout(5000)
+            await self.page.wait_for_timeout(1500)
 
         textarea = await self.page.wait_for_selector(
             "textarea.message-input-textarea", timeout=15000
@@ -967,41 +1004,41 @@ class QwenClient:
 
         await self._dismiss_popups()
         try:
-            await textarea.click(timeout=5000)
+            await textarea.click(timeout=3000)
         except Exception:
             await self._dismiss_popups()
-            await textarea.click(timeout=5000, force=True)
+            await textarea.click(timeout=3000, force=True)
         await self.page.wait_for_timeout(PRE_SEND_WAIT)
         await textarea.fill(message)
         await self.page.wait_for_timeout(PRE_SEND_WAIT)
 
         msg_count = await self._count_messages()
         user_count_before = len(await self.page.query_selector_all(".qwen-chat-message-user"))
-        await textarea.press("Enter")
-        console.print("  [dim]Sending...[/dim]")
 
-        # Verify send: wait for the user bubble to actually appear instead of
-        # a blind sleep — resolves as soon as it lands, falls back to retry
-        # if it genuinely didn't go through.
+        # Prefer Send button — Enter often does nothing on current Qwen Studio UI.
+        console.print("  [dim]Sending...[/dim]")
+        clicked = await self._click_send_button()
+        if not clicked:
+            await textarea.press("Enter")
+
         sent = await self._wait_user_message(user_count_before)
         if not sent:
-            console.print("  [yellow]Retry...[/yellow]")
-            await self.page.reload(wait_until="domcontentloaded")
+            # Fast fallback: Enter then Send (no full-page reload — that cost minutes).
+            console.print("  [yellow]Retry send...[/yellow]")
             await self._dismiss_popups()
-            textarea = await self.page.wait_for_selector("textarea.message-input-textarea", timeout=10000)
             try:
-                await textarea.click(timeout=5000)
+                await textarea.click(timeout=2000, force=True)
             except Exception:
-                await self._dismiss_popups()
-                await textarea.click(timeout=5000, force=True)
-            await self.page.wait_for_timeout(PRE_SEND_WAIT)
+                textarea = await self.page.wait_for_selector(
+                    "textarea.message-input-textarea", timeout=8000
+                )
+                await textarea.click(timeout=2000, force=True)
             await textarea.fill(message)
-            await self.page.wait_for_timeout(PRE_SEND_WAIT)
-            msg_count = await self._count_messages()
-            user_count_before = len(await self.page.query_selector_all(".qwen-chat-message-user"))
             await textarea.press("Enter")
-            console.print("  [dim]Sending...[/dim]")
-            await self._wait_user_message(user_count_before)
+            await self._click_send_button()
+            sent = await self._wait_user_message(user_count_before)
+            if not sent:
+                raise RuntimeError("Message failed to send (user bubble never appeared)")
 
         return await self._wait_for_response(msg_count)
 
@@ -1613,7 +1650,7 @@ async def _run_chat(
         # Ensure we're on chat page
         if "/auth" in client.page.url:
             await client.page.goto(QWEN_CHAT_URL, wait_until="domcontentloaded")
-            await client.page.wait_for_timeout(5000)
+            await client.page.wait_for_timeout(1200)
 
         try:
             await client.page.wait_for_selector("textarea.message-input-textarea", timeout=15000)
