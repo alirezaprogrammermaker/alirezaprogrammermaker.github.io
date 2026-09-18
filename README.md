@@ -16,7 +16,6 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback
 - Publishes to `subs/` for GitHub Pages (**sorted by lowest ping first**)
 - **Continuous ~6h live job**: discovery loop + **parallel health-watch every 2 minutes** (dead servers dropped & list republished immediately); cron every 5h starts the next job
-- Remarks show ping only: `⚡{ms}ms-{n}` (same simple style as before usecase labels)
 - Protocols: `vmess` `vless` `trojan` `ss` `ssr` `hysteria`/`hysteria2` `tuic` `wireguard` `socks` `http` `juicity` `anytls` `brook` `naive` `mieru`
 - Telegram: best configs + nightly summary + channel description update
 - Channel description shows **Shamsi (Tehran) last activity** plus subscription URLs

@@ -65,23 +65,10 @@ def _b64json(payload: str) -> dict | None:
         return None
 
 
-def _vmess_security(tls_val: object) -> str:
-    """Normalize vmess `tls` field (bool / string) to xray security name."""
-    if isinstance(tls_val, bool):
-        return "tls" if tls_val else ""
-    s = str(tls_val or "").strip().lower()
-    if s in {"1", "true", "yes", "on"}:
-        return "tls"
-    if s in {"", "0", "false", "no", "none", "off"}:
-        return ""
-    return s
-
-
 def parse_vmess(link: str) -> ProxyConfig | None:
     if not link.lower().startswith("vmess://"):
         return None
-    # Clients / subscriptions often append #remark — never feed it into base64 JSON
-    payload = link[8:].split("#", 1)[0].strip()
+    payload = link[8:]
     obj = _b64json(payload)
     if not obj:
         return None
@@ -93,32 +80,18 @@ def parse_vmess(link: str) -> ProxyConfig | None:
     uuid = str(obj.get("id") or "").strip()
     if not host or not port or not uuid:
         return None
-    # Prefer URL fragment remark when present (subscription display name)
-    frag = ""
-    if "#" in link:
-        from urllib.parse import unquote
-
-        frag = unquote(link.rsplit("#", 1)[-1]).strip()
     cfg = ProxyConfig(
         scheme="vmess",
         raw=link.strip(),
         host=host,
         port=port,
         uuid_or_password=uuid,
-        remark=frag or str(obj.get("ps") or ""),
+        remark=str(obj.get("ps") or ""),
         network=str(obj.get("net") or ""),
-        security=_vmess_security(obj.get("tls")),
+        security=str(obj.get("tls") or ""),
         sni=str(obj.get("sni") or obj.get("host") or ""),
         path=str(obj.get("path") or ""),
-        extra={
-            "aid": obj.get("aid"),
-            "type": obj.get("type"),
-            "v": obj.get("v"),
-            # WS/HTTP Host header — must stay separate from server address / SNI
-            "host": obj.get("host") or "",
-            "fp": obj.get("fp") or "",
-            "alpn": obj.get("alpn") or "",
-        },
+        extra={"aid": obj.get("aid"), "type": obj.get("type"), "v": obj.get("v")},
     )
     cfg.ensure_fingerprint()
     return cfg
@@ -247,12 +220,8 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
 
     net = qs.get("type") or qs.get("network") or ""
     security = qs.get("security") or qs.get("tls") or ""
-    sni = qs.get("sni") or qs.get("peer") or ""
+    sni = qs.get("sni") or qs.get("peer") or qs.get("host") or ""
     path = qs.get("path") or ""
-    # Keep WS/HTTP Host header distinct from SNI (CDN setups often differ)
-    host_header = qs.get("host") or ""
-    if not sni and host_header:
-        sni = host_header
 
     normalized_scheme = _normalize_scheme(want if want != "hy2" else "hysteria2")
     if want in {"hy2", "hysteria2"}:
@@ -263,14 +232,6 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
         normalized_scheme = "socks"
     if want in {"http", "https"}:
         normalized_scheme = "http"
-
-    extra = {
-        k: v
-        for k, v in qs.items()
-        if k not in {"type", "network", "security", "tls", "sni", "peer", "path"}
-    }
-    if host_header:
-        extra["host"] = host_header
 
     cfg = ProxyConfig(
         scheme=normalized_scheme,
@@ -283,7 +244,11 @@ def parse_uri_style(link: str, scheme: str) -> ProxyConfig | None:
         security=security,
         sni=sni,
         path=path,
-        extra=extra,
+        extra={
+            k: v
+            for k, v in qs.items()
+            if k not in {"type", "network", "security", "tls", "sni", "peer", "host", "path"}
+        },
     )
     cfg.ensure_fingerprint()
     return cfg
