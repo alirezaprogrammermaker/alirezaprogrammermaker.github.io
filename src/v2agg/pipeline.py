@@ -116,6 +116,12 @@ class Pipeline:
 
     def _commit_healthy(self, healthy: list[ProxyConfig], *, reason: str) -> list[ProxyConfig]:
         """Persist + publish (+ optional git push). Caller should hold lock when merging state."""
+        # startup-retag must not age-evict before health-watch retests
+        if reason.startswith("startup"):
+            now = time.time()
+            for c in healthy:
+                if c.alive:
+                    c.last_ok_ts = now
         fresh = self._filter_fresh_healthy(healthy)
         # Always refresh usecase from current metrics (latency/throughput may have changed)
         from v2agg.util.ranking import classify_usecase
@@ -134,6 +140,9 @@ class Pipeline:
                 "skip empty publish reason=%s — keeping previous subs/ until real proxies found",
                 reason,
             )
+            # Still rewrite remarks/ps if the on-disk list uses a broken format
+            if self.publisher.needs_remark_retag():
+                self._retag_public_list(reason=f"{reason}-retag")
             return fresh
 
         self.publisher.publish(fresh)
@@ -155,6 +164,24 @@ class Pipeline:
                 logger.warning("telegram description update failed: %s", type(exc).__name__)
         return fresh
 
+    def _retag_public_list(self, *, reason: str) -> int:
+        """Re-publish existing public links with safe remarks (hyphen + vmess ps) immediately."""
+        configs = self.publisher.load_public_configs()
+        if not configs:
+            return 0
+        now = time.time()
+        for c in configs:
+            if c.alive and c.last_ok_ts is None:
+                c.last_ok_ts = now
+            if c.alive and not c.usecase:
+                from v2agg.util.ranking import classify_usecase
+
+                c.usecase = classify_usecase(c, self.settings)
+        self.publisher.publish(configs)
+        logger.info("retagged public list reason=%s count=%d", reason, len(configs))
+        if self.git_publish:
+            push_subs_if_changed()
+        return len(configs)
     def _merge_alive_into_store(self, probed: list[ProxyConfig]) -> list[ProxyConfig]:
         """Apply probe results onto the healthy DB under lock; drop dead; add newly alive."""
         with self._lock:
@@ -314,6 +341,25 @@ class Pipeline:
             int(self.max_runtime),
             int(self.health_watch_interval),
         )
+        # Immediately fix on-disk remarks (middle-dot / stale vmess ps) so clients can connect
+        # without waiting for the first long probe cycle.
+        try:
+            with self._lock:
+                stored = self.store.load_healthy()
+                if stored:
+                    # Refresh age so startup publish is not wiped by healthy_max_age
+                    now = time.time()
+                    for c in stored:
+                        if c.alive and (c.last_ok_ts is None or (now - c.last_ok_ts) > 60):
+                            # Keep until health-watch retests; do not pretend a new probe
+                            if c.last_ok_ts is None:
+                                c.last_ok_ts = now
+                    self._commit_healthy(stored, reason="startup-retag")
+                elif self.publisher.needs_remark_retag():
+                    self._retag_public_list(reason="startup-public-retag")
+        except Exception as exc:
+            logger.warning("startup retag failed: %s", type(exc).__name__)
+
         watch = threading.Thread(target=self._health_watch_loop, name="health-watch", daemon=True)
         watch.start()
         cycle = 0

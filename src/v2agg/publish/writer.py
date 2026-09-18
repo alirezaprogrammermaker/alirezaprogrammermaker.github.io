@@ -1,16 +1,28 @@
 from __future__ import annotations
 
+import re
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+from urllib.parse import unquote
 
 from v2agg.models import ProxyConfig
+from v2agg.parse.links import parse_link
 from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
-from v2agg.util.ranking import remark_with_latency, sort_by_latency
+from v2agg.util.ranking import (
+    USECASE_DOWNLOAD,
+    USECASE_GAME,
+    USECASE_WEB,
+    classify_usecase,
+    remark_with_latency,
+    sort_by_latency,
+)
 
 logger = get_logger(__name__)
+
+_MS_RE = re.compile(r"(\d+)\s*ms", re.IGNORECASE)
 
 
 class Publisher:
@@ -41,6 +53,49 @@ class Publisher:
             links.append(rewrite_remark(cfg.raw, remark))
         return links
 
+    def load_public_configs(self) -> list[ProxyConfig]:
+        """Parse current subs/all.txt into configs (best-effort latency/usecase from remark)."""
+        path = self.output_dir / self.all_file
+        if not path.is_file():
+            return []
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        out: list[ProxyConfig] = []
+        for line in text.splitlines():
+            line = line.strip()
+            if not line or "://" not in line:
+                continue
+            cfg = parse_link(line)
+            if cfg is None:
+                continue
+            remark = unquote(line.rsplit("#", 1)[-1]) if "#" in line else (cfg.remark or "")
+            cfg.remark = remark
+            m = _MS_RE.search(remark)
+            if m:
+                cfg.latency_ms = float(m.group(1))
+                cfg.alive = True
+                cfg.score = max(cfg.score, 50.0)
+            if USECASE_GAME in remark:
+                cfg.usecase = USECASE_GAME
+            elif USECASE_WEB in remark:
+                cfg.usecase = USECASE_WEB
+            elif USECASE_DOWNLOAD in remark:
+                cfg.usecase = USECASE_DOWNLOAD
+            elif cfg.alive:
+                cfg.usecase = classify_usecase(cfg, self.settings)
+            out.append(cfg)
+        return out
+
+    def needs_remark_retag(self) -> bool:
+        """True if public list still uses broken middle-dot remarks or vmess ps mismatch."""
+        path = self.output_dir / self.all_file
+        if not path.is_file() or path.stat().st_size == 0:
+            return False
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        # Middle-dot separator broke some clients after usecase labels
+        if "·" in text or "%C2%B7" in text:
+            return True
+        return False
+
     def publish(self, healthy: list[ProxyConfig]) -> dict[str, Path]:
         alive = [c for c in healthy if c.alive]
         # Lowest ping first (user-facing list order)
@@ -48,7 +103,6 @@ class Publisher:
         best = [c for c in alive if c.score >= self.best_threshold][: max(20, self.max_healthy // 4)]
         # best already latency-sorted as a subset of alive order; re-sort for safety
         best = sort_by_latency(best)
-
         self.output_dir.mkdir(parents=True, exist_ok=True)
         by_dir = self.output_dir / self.by_proto
         by_dir.mkdir(parents=True, exist_ok=True)

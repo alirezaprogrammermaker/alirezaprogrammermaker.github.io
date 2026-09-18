@@ -165,3 +165,58 @@ logging:
     out = pipe._commit_healthy([], reason="health-watch")
     assert out == []
     assert (subs / "all.txt").read_text(encoding="utf-8").startswith("vless://keep-me")
+
+
+def test_retag_rewrites_middle_dot_remarks(tmp_path: Path):
+    from urllib.parse import quote
+
+    settings = tmp_path / "settings.yaml"
+    sources = tmp_path / "sources.yaml"
+    subs = tmp_path / "subs"
+    subs.mkdir()
+    # Broken middle-dot remark format from earlier release
+    bad = "vless://11111111-2222-3333-4444-555555555555@example.com:443?security=tls&type=tcp#" + quote(
+        "⚡40ms·بازی-1", safe=""
+    )
+    (subs / "all.txt").write_text(bad + "\n", encoding="utf-8")
+    settings.write_text(
+        f"""
+app: {{pages_base_url: "https://example.test"}}
+pipeline:
+  continuous: false
+  healthy_max_age_hours: 24
+  git_publish: false
+  max_healthy_publish: 50
+  best_score_threshold: 40
+state:
+  dir: {tmp_path / "state"}
+  checkpoint_file: checkpoint.json
+  metrics_file: metrics.json
+  healthy_db_file: healthy.json
+publish:
+  output_dir: {subs}
+  all_file: all.txt
+  remark_prefix: "⚡"
+  usecase:
+    game_max_ms: 150
+    web_max_ms: 500
+    download_min_kbps: 400
+testing:
+  mode: tcp
+telegram:
+  dry_run: true
+logging:
+  level: WARNING
+""",
+        encoding="utf-8",
+    )
+    sources.write_text("sources: []\n", encoding="utf-8")
+    pipe = Pipeline(settings, sources, mode="publish-only", dry_run_telegram=True)
+    assert pipe.publisher.needs_remark_retag() is True
+    n = pipe._retag_public_list(reason="test")
+    assert n == 1
+    text = (subs / "all.txt").read_text(encoding="utf-8")
+    assert "·" not in text and "%C2%B7" not in text
+    from urllib.parse import unquote
+
+    assert "بازی" in unquote(text)
