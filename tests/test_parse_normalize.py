@@ -201,6 +201,13 @@ def test_no_tcp_fake_alive_for_hysteria_when_xray_mode():
     assert out.alive is False
 
 
+def test_socks_proxy_supported_helper():
+    from v2agg.test.live import socks_proxy_supported
+
+    # After httpx[socks]/socksio install this must be True — otherwise all probes die silently
+    assert socks_proxy_supported() is True
+
+
 def test_classify_usecase_from_real_latency():
     from v2agg.util.ranking import USECASE_DOWNLOAD, USECASE_GAME, USECASE_WEB, classify_usecase, remark_with_latency
 
