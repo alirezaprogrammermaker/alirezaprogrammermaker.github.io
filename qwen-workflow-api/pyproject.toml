@@ -1,0 +1,14 @@
+[project]
+name = "qwen-workflow-api"
+version = "0.1.0"
+description = "OpenAI-compatible Qwen workflow control plane (Cloudflare Workers + D1)"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi",
+]
+
+[dependency-groups]
+dev = [
+  "workers-py",
+  "workers-runtime-sdk",
+]

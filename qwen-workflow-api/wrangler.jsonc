@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "qwen-workflow-api",
+  "main": "src/worker.py",
+  "compatibility_date": "2026-09-17",
+  "compatibility_flags": ["python_workers", "python_dedicated_snapshot"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": { "enabled": true },
+  "triggers": {
+    "crons": ["0 3 * * *"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "qwen_workflow",
+      "database_id": "6e135675-302b-439c-a2c0-315d5a83c018",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
