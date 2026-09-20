@@ -14,6 +14,9 @@ on:
   schedule:
     # Every 5 hours — overlaps the 5h30m runtime so the next run is ready to start
     - cron: "17 */5 * * *"
+  # Retrigger 2026-09-20: restart refresh after PR #21 so quality hardening
+  # (Top-N best ≤30, Mbps scoring, real hy2) is validated on a fresh job.
+  # A push to this file cancels any in-progress run via concurrency below.
   push:
     branches: [main]
     paths:
