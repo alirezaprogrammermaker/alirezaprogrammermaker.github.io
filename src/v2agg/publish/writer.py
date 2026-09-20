@@ -8,7 +8,7 @@ from v2agg.models import ProxyConfig
 from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
-from v2agg.util.ranking import remark_with_latency, select_best_configs
+from v2agg.util.ranking import remark_with_latency, select_best_configs, select_best_hy2
 
 logger = get_logger(__name__)
 
@@ -23,9 +23,12 @@ class Publisher:
         self.all_b64 = pub.get("all_base64_file") or "all.base64"
         self.best_file = pub.get("best_file") or "best.txt"
         self.best_b64 = pub.get("best_base64_file") or "best.base64"
+        self.best_hy2_file = pub.get("best_hy2_file") or "best-hy2.txt"
+        self.best_hy2_b64 = pub.get("best_hy2_base64_file") or "best-hy2.base64"
         self.by_proto = pub.get("by_protocol_dir") or "by-protocol"
         self.sanitize = bool(pub.get("sanitize_remarks", True))
         self.remark_prefix = pub.get("remark_prefix") or "⚡"
+        self.settings = settings
         pipe = settings.get("pipeline") or {}
         # Defaults must match config/settings.yaml so a missed YAML key still
         # keeps `best` a strict Top-N subset of `all`.
@@ -34,6 +37,7 @@ class Publisher:
         self.best_max_publish = int(pipe.get("best_max_publish", 30))
         self.best_max_per_prefix24 = int(pipe.get("best_max_per_prefix24", 2))
         self.best_max_per_reality_pbk = int(pipe.get("best_max_per_reality_pbk", 2))
+        self.best_hy2_max_publish = int(pipe.get("best_hy2_max_publish", 40))
 
     def _public_links(self, configs: list[ProxyConfig]) -> list[str]:
         links: list[str] = []
@@ -55,6 +59,13 @@ class Publisher:
             max_publish=self.best_max_publish,
             max_per_prefix24=self.best_max_per_prefix24,
             max_per_reality_pbk=self.best_max_per_reality_pbk,
+            settings=self.settings,
+        )
+        best_hy2 = select_best_hy2(
+            alive,
+            max_publish=self.best_hy2_max_publish,
+            max_per_prefix24=self.best_max_per_prefix24,
+            settings=self.settings,
         )
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -63,6 +74,7 @@ class Publisher:
 
         all_links = self._public_links(alive)
         best_links = self._public_links(best)
+        best_hy2_links = self._public_links(best_hy2)
 
         paths: dict[str, Path] = {}
         paths["all"] = self.output_dir / self.all_file
@@ -73,6 +85,12 @@ class Publisher:
         paths["best"].write_text("\n".join(best_links) + ("\n" if best_links else ""), encoding="utf-8")
         paths["best_b64"] = self.output_dir / self.best_b64
         paths["best_b64"].write_text(encode_subscription_base64(best_links), encoding="utf-8")
+        paths["best_hy2"] = self.output_dir / self.best_hy2_file
+        paths["best_hy2"].write_text(
+            "\n".join(best_hy2_links) + ("\n" if best_hy2_links else ""), encoding="utf-8"
+        )
+        paths["best_hy2_b64"] = self.output_dir / self.best_hy2_b64
+        paths["best_hy2_b64"].write_text(encode_subscription_base64(best_hy2_links), encoding="utf-8")
 
         # index for humans (no source mentions)
         index = self.output_dir / "index.json"
@@ -81,11 +99,14 @@ class Publisher:
                 {
                     "count_all": len(all_links),
                     "count_best": len(best_links),
+                    "count_best_hy2": len(best_hy2_links),
                     "files": {
                         "all": self.all_file,
                         "all_base64": self.all_b64,
                         "best": self.best_file,
                         "best_base64": self.best_b64,
+                        "best_hy2": self.best_hy2_file,
+                        "best_hy2_base64": self.best_hy2_b64,
                     },
                 },
                 indent=2,
@@ -113,11 +134,19 @@ class Publisher:
             "that support V2Ray share links.\n\n"
             f"- All (base64): `{self.all_b64}`\n"
             f"- Best (base64): `{self.best_b64}`\n"
+            f"- Best Hysteria2 (base64): `{self.best_hy2_b64}`\n"
             f"- All (plain): `{self.all_file}`\n"
-            f"- Best (plain): `{self.best_file}`\n",
+            f"- Best (plain): `{self.best_file}`\n"
+            f"- Best Hysteria2 (plain): `{self.best_hy2_file}`\n",
             encoding="utf-8",
         )
         paths["readme"] = readme
 
-        logger.info("published all=%d best=%d dir=%s", len(all_links), len(best_links), self.output_dir)
+        logger.info(
+            "published all=%d best=%d best_hy2=%d dir=%s",
+            len(all_links),
+            len(best_links),
+            len(best_hy2_links),
+            self.output_dir,
+        )
         return paths
