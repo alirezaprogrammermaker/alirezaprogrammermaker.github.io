@@ -47,6 +47,8 @@ class Pipeline:
         tw = watch_settings.setdefault("testing", {})
         tw["local_socks_base_port"] = int(tw.get("watch_socks_base_port") or 26000)
         tw["xray_workdir"] = tw.get("watch_xray_workdir") or "state/runtime/xray-watch"
+        tw["singbox_workdir"] = tw.get("watch_singbox_workdir") or "state/runtime/singbox-watch"
+        tw["singbox_socks_base_port"] = int(tw.get("watch_singbox_socks_base_port") or 27000)
         tw["concurrency"] = int(tw.get("watch_concurrency") or min(16, int(tw.get("concurrency") or 16)))
         self.watch_tester = LiveTester(watch_settings)
         self.publisher = Publisher(self.settings)
@@ -57,7 +59,8 @@ class Pipeline:
         self.checkpoint_interval = float(pipe.get("checkpoint_interval_sec", 120))
         self.max_test = int(pipe.get("max_configs_to_test_per_run", 800))
         self.max_tg = int(pipe.get("max_telegram_post_per_run", 15))
-        self.best_threshold = float(pipe.get("best_score_threshold", 40))
+        self.best_threshold = float(pipe.get("best_score_threshold", 70))
+        self.best_max_publish = int(pipe.get("best_max_publish", 30))
         self.retest_healthy_first = bool(pipe.get("retest_healthy_first", True))
         self.healthy_max_age_hours = float(pipe.get("healthy_max_age_hours", 4))
         self.continuous = bool(pipe.get("continuous", True))

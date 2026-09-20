@@ -8,8 +8,9 @@ import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential_jitter
 
 from v2agg.models import ProxyConfig, RunMetrics
-from v2agg.parse.normalize import rewrite_remark, sanitize_remark
+from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.logging import get_logger
+from v2agg.util.ranking import remark_with_latency
 
 logger = get_logger(__name__)
 
@@ -103,13 +104,18 @@ class TelegramClient:
         return True
 
     def post_config(self, cfg: ProxyConfig, index: int) -> bool:
-        remark = sanitize_remark(cfg.remark, "⚡", index)
+        remark = remark_with_latency(cfg, "⚡", index)
         link = rewrite_remark(cfg.raw, remark)
         # Escape backticks in link for Markdown
         safe_link = link.replace("`", "'")
+        if cfg.throughput_mbps is not None and cfg.throughput_mbps > 0:
+            throughput_s = f"{cfg.throughput_mbps:.1f}"
+        else:
+            throughput_s = "n/a"
         text = self.message_template.format(
             protocol=cfg.scheme.upper(),
             latency_ms=int(cfg.latency_ms or 0),
+            throughput_mbps=throughput_s,
             score=int(cfg.score),
             link=safe_link,
         )

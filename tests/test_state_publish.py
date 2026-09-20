@@ -46,7 +46,7 @@ def test_publisher_no_source_in_output(tmp_path: Path):
             "sanitize_remarks": True,
             "remark_prefix": "⚡",
         },
-        "pipeline": {"max_healthy_publish": 50, "best_score_threshold": 40},
+        "pipeline": {"max_healthy_publish": 50, "best_score_threshold": 70, "best_max_publish": 30},
     }
     pub = Publisher(settings)
     cfg = ProxyConfig(
@@ -65,5 +65,7 @@ def test_publisher_no_source_in_output(tmp_path: Path):
     text = paths["all"].read_text(encoding="utf-8")
     assert "secret-source" not in text
     assert "github" not in text.lower()
+    assert "120ms" in text
     index = json.loads(paths["index"].read_text(encoding="utf-8"))
     assert index["count_all"] == 1
+    assert index["count_best"] == 1
