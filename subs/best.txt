@@ -24,7 +24,7 @@ vless://b3a11068-1a7e-4643-85de-7c82cce46943@185.223.57.10:33743?mode=gun&securi
 vless://5fcdc9b7-e70f-4a5c-85c3-e018ad818326@82.24.203.20:2087?encryption=none&path=%2Ffd5ba98a3970&security=none&type=ws#%E2%9A%A1493ms-2.1M-24
 vless://0b0915d7-6800-4580-a44b-77d84f105e6a@185.79.138.71:448?security=reality&encryption=none&pbk=CsDgNRcCwCkPIslfZpKTIK71KFpIFNsotbdzKcZVoH8&headerType=none&fp=chrome&type=tcp&sni=www.samsung.com&sid=cd21e552537c7c0b#%E2%9A%A1577ms-1.3M-25
 vmess://eyJhZGQiOiAiNjYuMTYzLjExNy41OCIsICJhaWQiOiAiMCIsICJhbHBuIjogIiIsICJmcCI6ICIiLCAiaG9zdCI6ICJAUHJveHlWUE4xMSIsICJpZCI6ICIwNDYyMWJhZS1hYjM2LTExZWMtYjkwOS0wMjQyYWMxMjAwMDIiLCAiaW5zZWN1cmUiOiAiMCIsICJuZXQiOiAidGNwIiwgInBhdGgiOiAiLyBAUHJveHlWUE4xMSIsICJwb3J0IjogIjIyMzI0IiwgInBzIjogIkVQT0RPTklPUyIsICJzY3kiOiAiYXV0byIsICJzbmkiOiAiIiwgInRscyI6ICIiLCAidHlwZSI6ICJub25lIiwgInYiOiAiMiJ9#%E2%9A%A1367ms-0.3M-26
-vless://de5906f3-df38-4463-aa9d-2b01320cc6ea@31.76.76.28:443?path=%2F&security=none&encryption=none&type=ws#%E2%9A%A1531ms-1.9M-27
-vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.24.201:443?type=tcp&security=reality&sni=app11.betust.net&fp=chrome&pbk=XhzNlmMTdYr2pYTqiNNP6qWe7BkAgVHU-kZWXc9u9hY&sid=91c2269c&encryption=none&flow=xtls-rprx-vision#%E2%9A%A1833ms-1.6M-28
-hysteria2://d4a705d40356ef719212045528e04594@45.149.172.80:443?insecure=1&obfs=salamander&obfs-password=5c8f1a3e7b2d9046c1f8a5e3b7d04f2a#%E2%9A%A1722ms-0.3M-29
-vless://06c4e938-2954-478f-a870-ca1b163e30e9@94.183.170.135:443?encryption=none&path=/&security=none&type=ws#%E2%9A%A1597ms-1.6M-30
+hy2://H7mP2xY9kJ4nQ8wR5tF6vB3z@vpn-au-002.fastervpn.world:443/?insecure=1&sni=whatsapp.com#%E2%9A%A11009ms-0.9M-27
+vless://de5906f3-df38-4463-aa9d-2b01320cc6ea@31.76.76.28:443?path=%2F&security=none&encryption=none&type=ws#%E2%9A%A1531ms-1.9M-28
+vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.24.201:443?type=tcp&security=reality&sni=app11.betust.net&fp=chrome&pbk=XhzNlmMTdYr2pYTqiNNP6qWe7BkAgVHU-kZWXc9u9hY&sid=91c2269c&encryption=none&flow=xtls-rprx-vision#%E2%9A%A1833ms-1.6M-29
+hysteria2://d4a705d40356ef719212045528e04594@45.149.172.80:443?insecure=1&obfs=salamander&obfs-password=5c8f1a3e7b2d9046c1f8a5e3b7d04f2a#%E2%9A%A1722ms-0.3M-30
