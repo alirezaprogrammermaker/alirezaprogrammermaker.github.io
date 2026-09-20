@@ -16,7 +16,7 @@ Modular aggregator that collects public V2Ray/Xray share links, **live-tests** t
 - Live tests via **Xray-core** HTTP probe through SOCKS when available; TCP/TLS fallback for non-hy2 only
 - **Hysteria2 / hy2** is probed with **sing-box** (SOCKS inbound + hysteria2 outbound). Bare TCP/TLS never marks hy2 alive; if sing-box is missing, hy2 fails closed
 - After a successful Xray/sing-box probe, a small download (default 256KB via Cloudflare `__down`) measures **Mbps** and is blended into the score (`0.65` latency + `0.35` throughput)
-- **`subs/best`** is a strict quality list: score ≥ `best_score_threshold` (default **70**), sorted best-first, hard cap `best_max_publish` (default **30**). `subs/all` stays broader (`max_healthy_publish`, default **150**)
+- **`subs/best`** is a strict quality list: score ≥ `best_score_threshold` (default **70**), sorted best-first, hard cap `best_max_publish` (default **30**), then greedily filled with diversity caps (max **2** per IPv4 `/24` and max **2** per Reality `pbk` / `(pbk, sni)`). Unused slots are backfilled from lower-score alive nodes that add a new `/24` or `pbk` (diversity over raw Mbps). `subs/all` stays broader (`max_healthy_publish`, default **150**) and is not diversity-capped. **GitHub Actions probes from abroad — a high score does not mean the path from Iran works.**
 - Public remarks include latency (and Mbps when measured) so clients can sort; still **no** source attribution
 - Publishes to `subs/` for GitHub Pages
 - Telegram: best configs + nightly summary + channel description update
@@ -79,8 +79,12 @@ pytest -q
 
 | Setting | Default | Meaning |
 |---------|---------|---------|
-| `pipeline.best_score_threshold` | `70` | Minimum blended score for `best` |
+| `pipeline.best_score_threshold` | `70` | Minimum blended score for the first `best` pass |
 | `pipeline.best_max_publish` | `30` | Hard Top-N after sorting by score, then latency |
+| `pipeline.best_max_per_prefix24` | `2` | Max `best` entries per IPv4 `/24` (hostnames use a host-key instead; no DNS) |
+| `pipeline.best_max_per_reality_pbk` | `2` | Max `best` entries per Reality `pbk` and per `(pbk, sni)` pair |
+
+Actions tests from a vantage **outside Iran**. High Mbps on a Reality `/24` cluster can still be dead on Iranian paths — diversity caps keep that cluster to 2 slots, then backfill other networks.
 | `pipeline.max_healthy_publish` | `150` | Cap for `all` (must stay larger than `best`) |
 | `testing.throughput_enabled` | `true` | Mbps probe through the same SOCKS proxy |
 | `testing.throughput_bytes` | `262144` | Download size (256KB) |
@@ -124,7 +128,7 @@ tests/
 
 ### خلاصه
 
-این پروژه لینک‌های اشتراک V2Ray/Xray را از منابع قابل‌پیکربندی جمع می‌کند، با **تست واقعی اتصال** (نه قبول جعلی) فیلتر می‌کند، لیست تمیز را روی **GitHub Pages** منتشر می‌کند و بهترین‌ها را به کانال تلگرام می‌فرستد. لیست `best` حداکثر ۳۰ سرور با امتیاز ≥ ۷۰ است؛ hysteria2 فقط با sing-box تست می‌شود. در خروجی عمومی و پیام‌های تلگرام **هیچ اشاره‌ای به منبع یا روش جمع‌آوری** نمی‌شود.
+این پروژه لینک‌های اشتراک V2Ray/Xray را از منابع قابل‌پیکربندی جمع می‌کند، با **تست واقعی اتصال** (نه قبول جعلی) فیلتر می‌کند، لیست تمیز را روی **GitHub Pages** منتشر می‌کند و بهترین‌ها را به کانال تلگرام می‌فرستد. لیست `best` حداکثر ۳۰ سرور با امتیاز ≥ ۷۰ است و از یک `/24` یا یک کلید Reality بیش از دو مورد برنمی‌دارد. تست Actions از خارج ایران است؛ امتیاز بالا به‌معنای کار کردن مسیر ایران نیست. hysteria2 فقط با sing-box تست می‌شود. در خروجی عمومی و پیام‌های تلگرام **هیچ اشاره‌ای به منبع یا روش جمع‌آوری** نمی‌شود.
 
 ### راه‌اندازی سریع
 
