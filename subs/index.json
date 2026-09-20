@@ -1,10 +1,13 @@
 {
-  "count_all": 75,
+  "count_all": 74,
   "count_best": 30,
+  "count_best_hy2": 17,
   "files": {
     "all": "all.txt",
     "all_base64": "all.base64",
     "best": "best.txt",
-    "best_base64": "best.base64"
+    "best_base64": "best.base64",
+    "best_hy2": "best-hy2.txt",
+    "best_hy2_base64": "best-hy2.base64"
   }
 }
