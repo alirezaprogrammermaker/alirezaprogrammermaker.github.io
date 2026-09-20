@@ -42,6 +42,8 @@ state/runtime/
 bin/
 xray
 xray.exe
+sing-box
+sing-box.exe
 geoip.dat
 geosite.dat
 

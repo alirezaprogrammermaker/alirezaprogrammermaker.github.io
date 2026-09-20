@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Download Xray-core for live proxy probes (Linux amd64).
+# Download Xray-core and sing-box for live proxy probes (Linux amd64).
+# sing-box is required for hysteria2/hy2 — TCP-only must never mark hy2 alive.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BIN_DIR="${ROOT}/bin"
@@ -24,3 +25,19 @@ if [[ -f "${TMP}/xray/geosite.dat" ]]; then
 fi
 echo "Installed ${BIN_DIR}/xray"
 "${BIN_DIR}/xray" version || true
+
+# sing-box: real Hysteria2 (hy2) SOCKS probes — no TCP fake-pass
+SINGBOX_VERSION="${SINGBOX_VERSION:-1.13.16}"
+SINGBOX_ASSET="sing-box-${SINGBOX_VERSION}-linux-amd64.tar.gz"
+SINGBOX_URL="https://github.com/SagerNet/sing-box/releases/download/v${SINGBOX_VERSION}/${SINGBOX_ASSET}"
+echo "Downloading sing-box ${SINGBOX_VERSION}..."
+curl -fsSL -o "${TMP}/${SINGBOX_ASSET}" "${SINGBOX_URL}"
+tar -xzf "${TMP}/${SINGBOX_ASSET}" -C "${TMP}"
+SINGBOX_BIN="$(find "${TMP}" -type f -name sing-box -print -quit)"
+if [[ -z "${SINGBOX_BIN}" ]]; then
+  echo "sing-box binary not found in archive" >&2
+  exit 1
+fi
+install -m 0755 "${SINGBOX_BIN}" "${BIN_DIR}/sing-box"
+echo "Installed ${BIN_DIR}/sing-box"
+"${BIN_DIR}/sing-box" version || true
