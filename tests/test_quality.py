@@ -19,11 +19,29 @@ from v2agg.test.live import (
 )
 from v2agg.util.config import load_yaml
 from v2agg.util.ranking import (
+    effective_score,
     ipv4_prefix24,
     network_diversity_key,
     remark_with_latency,
     select_best_configs,
+    select_best_hy2,
 )
+
+
+def _iran_rank_settings() -> dict:
+    return {
+        "testing": {"protocol_score_bonus": {"hysteria2": 15}},
+        "pipeline": {
+            "reality_burned_sni": ["yahoo.com"],
+            "reality_burned_sni_penalty": 25,
+            "reality_burned_prefix24": ["169.40.42.0/24"],
+            "reality_burned_prefix_penalty": 20,
+            "reality_shared_pbk_min": 4,
+            "reality_shared_pbk_penalty": 10,
+            "reality_uncommon_sni_max": 2,
+            "reality_uncommon_sni_bonus": 5,
+        },
+    }
 
 
 def _cfg(
@@ -37,6 +55,7 @@ def _cfg(
     extra: dict | None = None,
     sni: str = "",
     scheme: str = "vless",
+    security: str = "",
 ) -> ProxyConfig:
     host = host if host is not None else f"10.{i % 250}.0.1"
     c = ProxyConfig(
@@ -52,6 +71,7 @@ def _cfg(
         last_ok_ts=1_700_000_000.0,
         extra=extra or {},
         sni=sni,
+        security=security,
     )
     c.ensure_fingerprint()
     return c
@@ -238,6 +258,199 @@ def test_publisher_best_diversity_does_not_shrink_all(tmp_path: Path):
     assert index["count_best"] == 12
     assert sum("169.40.42." in ln for ln in best_lines) <= 2
     assert sum("169.40.42." in ln for ln in all_lines) == 21
+    assert index["count_best_hy2"] == 0
+    assert index["files"]["best_hy2_base64"] == "best-hy2.base64"
+
+
+def test_hy2_protocol_bonus_affects_best_order():
+    vless = _cfg(1, score=90, latency_ms=40, host="1.1.1.1")
+    hy2 = _cfg(2, score=80, latency_ms=55, host="2.2.2.2", scheme="hysteria2")
+    plain = select_best_configs([vless, hy2], score_threshold=70, max_publish=2)
+    assert [c.scheme for c in plain] == ["vless", "hysteria2"]
+    settings = _iran_rank_settings()
+    assert effective_score(hy2, settings, apply_best_penalties=False) == 95.0
+    assert effective_score(vless, settings, apply_best_penalties=False) == 90.0
+    ranked = select_best_configs([vless, hy2], score_threshold=70, max_publish=2, settings=settings)
+    assert [c.scheme for c in ranked] == ["hysteria2", "vless"]
+    # Stored scores are unchanged; bonus is ranking-only.
+    assert hy2.score == 80
+    assert vless.score == 90
+
+
+def test_select_best_hy2_only_hy2_and_prefix24_cap():
+    hy2_diverse = [
+        _cfg(i, score=90 - i, latency_ms=20 + i, host=f"10.0.{i}.8", scheme="hysteria2")
+        for i in range(5)
+    ]
+    hy2_cluster = [
+        _cfg(50 + i, score=99, latency_ms=5 + i, host=f"203.0.113.{i + 1}", scheme="hysteria2")
+        for i in range(8)
+    ]
+    alias = _cfg(70, score=88, latency_ms=30, host="198.51.100.9", scheme="hy2")
+    vless = [_cfg(200 + i, score=100, latency_ms=1, host=f"8.8.8.{i + 1}") for i in range(6)]
+    picked = select_best_hy2(
+        hy2_diverse + hy2_cluster + [alias] + vless,
+        max_publish=40,
+        max_per_prefix24=2,
+    )
+    assert picked
+    assert all(c.scheme in {"hysteria2", "hy2"} for c in picked)
+    assert not any(c.scheme == "vless" for c in picked)
+    assert sum(1 for c in picked if ipv4_prefix24(c.host) == "203.0.113.0/24") <= 2
+    assert any(c.scheme == "hy2" for c in picked)
+    assert picked[0].score >= picked[-1].score
+
+
+def test_publisher_best_hy2_only_hy2(tmp_path: Path):
+    settings = {
+        "publish": {
+            "output_dir": str(tmp_path / "subs"),
+            "all_file": "all.txt",
+            "all_base64_file": "all.base64",
+            "best_file": "best.txt",
+            "best_base64_file": "best.base64",
+            "best_hy2_file": "best-hy2.txt",
+            "best_hy2_base64_file": "best-hy2.base64",
+            "by_protocol_dir": "by-protocol",
+            "sanitize_remarks": True,
+            "remark_prefix": "⚡",
+        },
+        "pipeline": {
+            "max_healthy_publish": 150,
+            "best_score_threshold": 70,
+            "best_max_publish": 30,
+            "best_hy2_max_publish": 40,
+            "best_max_per_prefix24": 2,
+        },
+        "testing": {"protocol_score_bonus": {"hysteria2": 15}},
+    }
+    hy2 = [
+        _cfg(i, score=85 - i, latency_ms=30 + i, host=f"10.1.{i}.4", scheme="hysteria2")
+        for i in range(6)
+    ]
+    cluster = [
+        _cfg(20 + i, score=94, latency_ms=8, host=f"192.0.2.{i + 1}", scheme="hysteria2")
+        for i in range(5)
+    ]
+    vless = [_cfg(100 + i, score=99, latency_ms=5, host=f"203.0.{i}.9") for i in range(4)]
+    paths = Publisher(settings).publish(hy2 + cluster + vless)
+    hy2_lines = [ln for ln in paths["best_hy2"].read_text(encoding="utf-8").splitlines() if ln]
+    all_lines = [ln for ln in paths["all"].read_text(encoding="utf-8").splitlines() if ln]
+    index = json.loads(paths["index"].read_text(encoding="utf-8"))
+    assert hy2_lines
+    assert all(ln.lower().startswith("hysteria2://") or ln.lower().startswith("hy2://") for ln in hy2_lines)
+    assert not any(ln.lower().startswith("vless://") for ln in hy2_lines)
+    assert sum("192.0.2." in ln for ln in hy2_lines) <= 2
+    assert index["count_best_hy2"] == len(hy2_lines)
+    assert index["count_best_hy2"] <= 40
+    assert any(ln.lower().startswith("vless://") for ln in all_lines)
+    readme = paths["readme"].read_text(encoding="utf-8")
+    assert "best-hy2.base64" in readme
+
+
+def test_burned_reality_penalty_keeps_yahoo_cluster_from_dominating():
+    cluster_pbk = "e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg"
+    burned = [
+        _cfg(
+            i,
+            score=95,
+            latency_ms=10 + i,
+            host=f"169.40.42.{i + 1}",
+            extra={"pbk": cluster_pbk},
+            sni="yahoo.com",
+            security="reality",
+        )
+        for i in range(20)
+    ]
+    hy2 = [
+        _cfg(100 + i, score=78, latency_ms=40 + i, host=f"198.51.{i}.100", scheme="hysteria2")
+        for i in range(5)
+    ]
+    good_reality = [
+        _cfg(
+            200 + i,
+            score=82,
+            latency_ms=50 + i,
+            host=f"203.0.{i}.10",
+            extra={"pbk": f"good-pbk-{i}"},
+            sni=f"cdn{i}.example.net",
+            security="reality",
+        )
+        for i in range(8)
+    ]
+    settings = _iran_rank_settings()
+    best = select_best_configs(
+        burned + hy2 + good_reality,
+        score_threshold=70,
+        max_publish=30,
+        settings=settings,
+    )
+    burned_hosts = {c.host for c in burned}
+    hy2_fps = {c.ensure_fingerprint() for c in hy2}
+    good_hosts = {c.host for c in good_reality}
+    best_fps = {c.ensure_fingerprint() for c in best}
+    best_hosts = {c.host for c in best}
+    assert hy2_fps <= best_fps
+    assert good_hosts <= best_hosts
+    assert sum(1 for c in best if c.host in burned_hosts) <= 2
+    assert sum(1 for c in best if c.host in burned_hosts) < len(best) / 2
+    # Alternatives occupy the front of best; burned yahoo+cluster is not first.
+    leading = best[: len(hy2) + len(good_reality)]
+    assert all(c.host not in burned_hosts for c in leading)
+    assert best[0].scheme == "hysteria2"
+
+
+def test_publisher_all_keeps_burned_reality(tmp_path: Path):
+    settings = {
+        "publish": {
+            "output_dir": str(tmp_path / "subs"),
+            "all_file": "all.txt",
+            "all_base64_file": "all.base64",
+            "best_file": "best.txt",
+            "best_base64_file": "best.base64",
+            "by_protocol_dir": "by-protocol",
+            "sanitize_remarks": True,
+            "remark_prefix": "⚡",
+        },
+        "pipeline": {
+            "max_healthy_publish": 150,
+            "best_score_threshold": 70,
+            "best_max_publish": 30,
+            **_iran_rank_settings()["pipeline"],
+        },
+        "testing": _iran_rank_settings()["testing"],
+    }
+    burned = [
+        _cfg(
+            i,
+            score=96,
+            latency_ms=8 + i,
+            host=f"169.40.42.{i + 1}",
+            extra={"pbk": "SHARED-BURNED-PBK"},
+            sni="yahoo.com",
+            security="reality",
+        )
+        for i in range(12)
+    ]
+    hy2 = [_cfg(50 + i, score=80, latency_ms=40, host=f"10.20.{i}.30", scheme="hysteria2") for i in range(4)]
+    alt = [
+        _cfg(
+            80 + i,
+            score=83,
+            latency_ms=45,
+            host=f"185.10.{i}.4",
+            extra={"pbk": f"alt-{i}"},
+            sni=f"unique{i}.cdn.net",
+            security="reality",
+        )
+        for i in range(6)
+    ]
+    paths = Publisher(settings).publish(burned + hy2 + alt)
+    all_lines = [ln for ln in paths["all"].read_text(encoding="utf-8").splitlines() if ln]
+    best_lines = [ln for ln in paths["best"].read_text(encoding="utf-8").splitlines() if ln]
+    assert sum("169.40.42." in ln for ln in all_lines) == 12
+    assert sum("169.40.42." in ln for ln in best_lines) <= 2
+    assert any("hysteria2://" in ln.lower() for ln in best_lines)
 
 
 def test_publisher_best_is_strict_subset(tmp_path: Path):
@@ -285,18 +498,24 @@ def test_publisher_defaults_match_yaml_and_cap_best(tmp_path: Path):
     assert pipe["best_max_publish"] == 30
     assert pipe["best_max_per_prefix24"] == 2
     assert pipe["best_max_per_reality_pbk"] == 2
+    assert pipe["best_hy2_max_publish"] == 40
+    assert pipe["reality_burned_sni"] == ["yahoo.com"]
+    assert pipe["reality_burned_sni_penalty"] == 25
+    assert pipe["reality_burned_prefix24"] == ["169.40.42.0/24"]
     assert pipe["max_healthy_publish"] == 150
     assert testing["throughput_enabled"] is True
     assert testing["throughput_bytes"] == 262144
     assert testing["singbox_bin"] == "bin/sing-box"
     assert testing["score_latency_weight"] == 0.65
     assert testing["score_throughput_weight"] == 0.35
+    assert testing["protocol_score_bonus"]["hysteria2"] == 15
 
     pub = Publisher({"publish": {"output_dir": str(tmp_path / "subs")}, "pipeline": {}})
     assert pub.best_threshold == 70
     assert pub.best_max_publish == 30
     assert pub.best_max_per_prefix24 == 2
     assert pub.best_max_per_reality_pbk == 2
+    assert pub.best_hy2_max_publish == 40
     assert pub.max_healthy == 150
 
     configs = [_cfg(i, score=50 + (i % 45), latency_ms=200) for i in range(60)]

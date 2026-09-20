@@ -30,6 +30,24 @@ pipeline:
   # full, backfill lower-score alive nodes that add a new /24 or pbk.
   best_max_per_prefix24: 2
   best_max_per_reality_pbk: 2
+  # Dedicated Iran-path hy2 list (alive hysteria2/hy2 only). Still applies /24
+  # diversity when the host is an IPv4 literal. Not a copy of `best`.
+  best_hy2_max_publish: 40
+  # Soft penalties for `best` only — never removed from `all`. Mass-cloned
+  # VLESS Reality with default SNI yahoo.com on burned clusters (e.g. IBM
+  # Softlayer 169.40.42.0/24 + the same pbk) often fails Iranian DPI even
+  # when GitHub Actions probes succeed. Remaining `best` slots after hy2
+  # prefer uncommon SNI / non-burned prefixes.
+  reality_burned_sni:
+    - yahoo.com
+  reality_burned_sni_penalty: 25
+  reality_burned_prefix24:
+    - 169.40.42.0/24
+  reality_burned_prefix_penalty: 20
+  reality_shared_pbk_min: 4
+  reality_shared_pbk_penalty: 10
+  reality_uncommon_sni_max: 2
+  reality_uncommon_sni_bonus: 5
   # Drop if not reconfirmed (~6 missed 2-min watches)
   healthy_max_age_hours: 0.2
 
@@ -77,6 +95,12 @@ testing:
   score_latency_weight: 0.65
   score_throughput_weight: 0.35
   score_throughput_missing_penalty: 0.20
+  # Ranking-only additives for `best` / `best-hy2` (stored scores and `subs/all`
+  # stay the latency+throughput blend). Hysteria2 empirically survives Iranian
+  # DPI better than mass-cloned VLESS Reality, so it is boosted when picking
+  # `best`. `hy2` is treated as an alias of `hysteria2`.
+  protocol_score_bonus:
+    hysteria2: 15
   score_throughput_excellent_mbps: 8
   score_throughput_good_mbps: 3
   score_throughput_ok_mbps: 1
@@ -105,6 +129,8 @@ publish:
   all_base64_file: all.base64
   best_file: best.txt
   best_base64_file: best.base64
+  best_hy2_file: best-hy2.txt
+  best_hy2_base64_file: best-hy2.base64
   by_protocol_dir: by-protocol
   # Strip remarks that look like source attribution
   sanitize_remarks: true
