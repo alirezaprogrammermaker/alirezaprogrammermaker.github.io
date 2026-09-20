@@ -32,6 +32,8 @@ class Publisher:
         self.max_healthy = int(pipe.get("max_healthy_publish", 150))
         self.best_threshold = float(pipe.get("best_score_threshold", 70))
         self.best_max_publish = int(pipe.get("best_max_publish", 30))
+        self.best_max_per_prefix24 = int(pipe.get("best_max_per_prefix24", 2))
+        self.best_max_per_reality_pbk = int(pipe.get("best_max_per_reality_pbk", 2))
 
     def _public_links(self, configs: list[ProxyConfig]) -> list[str]:
         links: list[str] = []
@@ -51,6 +53,8 @@ class Publisher:
             alive,
             score_threshold=self.best_threshold,
             max_publish=self.best_max_publish,
+            max_per_prefix24=self.best_max_per_prefix24,
+            max_per_reality_pbk=self.best_max_per_reality_pbk,
         )
 
         self.output_dir.mkdir(parents=True, exist_ok=True)

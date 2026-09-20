@@ -24,6 +24,12 @@ pipeline:
   # Strict quality gate so best cannot collapse to ≈all.
   best_score_threshold: 70
   best_max_publish: 30
+  # Diversity caps for `best` only (`all` stays broader). Greedy fill after
+  # score/latency sort: max N per IPv4 /24 (hostnames use a host-key instead)
+  # and max N per Reality pbk / (pbk, sni). Stops a single colo+/24 from
+  # occupying the whole best list when Actions probes from abroad succeed.
+  best_max_per_prefix24: 2
+  best_max_per_reality_pbk: 2
   # Drop if not reconfirmed (~6 missed 2-min watches)
   healthy_max_age_hours: 0.2
 

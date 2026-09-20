@@ -18,14 +18,31 @@ from v2agg.test.live import (
     score_throughput,
 )
 from v2agg.util.config import load_yaml
-from v2agg.util.ranking import remark_with_latency, select_best_configs
+from v2agg.util.ranking import (
+    ipv4_prefix24,
+    network_diversity_key,
+    remark_with_latency,
+    select_best_configs,
+)
 
 
-def _cfg(i: int, *, score: float, latency_ms: float, mbps: float | None = None, alive: bool = True) -> ProxyConfig:
+def _cfg(
+    i: int,
+    *,
+    score: float,
+    latency_ms: float,
+    mbps: float | None = None,
+    alive: bool = True,
+    host: str | None = None,
+    extra: dict | None = None,
+    sni: str = "",
+    scheme: str = "vless",
+) -> ProxyConfig:
+    host = host if host is not None else f"10.{i % 250}.0.1"
     c = ProxyConfig(
-        scheme="vless",
-        raw=f"vless://u@10.0.0.{i % 250}:443?type=tcp#n{i}",
-        host=f"10.0.0.{i % 250}",
+        scheme=scheme,
+        raw=f"{scheme}://u@{host}:{443 + i}?type=tcp#n{i}",
+        host=host,
         port=443 + i,
         uuid_or_password=f"u{i}",
         alive=alive,
@@ -33,6 +50,8 @@ def _cfg(i: int, *, score: float, latency_ms: float, mbps: float | None = None, 
         latency_ms=latency_ms,
         throughput_mbps=mbps,
         last_ok_ts=1_700_000_000.0,
+        extra=extra or {},
+        sni=sni,
     )
     c.ensure_fingerprint()
     return c
@@ -52,6 +71,133 @@ def test_select_best_threshold_and_top_n():
     assert len(best) == 3
     assert all(c.score >= 70 and c.alive for c in best)
     assert [c.score for c in best] == [90, 85, 72]
+
+
+def test_ipv4_prefix24_and_hostname_keys():
+    assert ipv4_prefix24("169.40.42.17") == "169.40.42.0/24"
+    assert ipv4_prefix24("yahoo.example") is None
+    clustered = _cfg(1, score=90, latency_ms=10, host="169.40.42.9")
+    named = _cfg(2, score=90, latency_ms=10, host="node.example.net")
+    assert network_diversity_key(clustered) == "p24:169.40.42.0/24"
+    assert network_diversity_key(named) == "host:node.example.net"
+
+
+def test_select_best_diversity_caps_prefix24_and_pbk():
+    """20 high-score clones on one /24 + same Reality pbk cannot dominate best."""
+    cluster_pbk = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    clustered = [
+        _cfg(
+            i,
+            score=95.0,
+            latency_ms=10 + i,
+            host=f"169.40.42.{i + 1}",
+            extra={"pbk": cluster_pbk},
+            sni="yahoo.com",
+        )
+        for i in range(20)
+    ]
+    others = [
+        _cfg(
+            100 + i,
+            score=80.0,
+            latency_ms=40 + i,
+            host=f"203.0.{i}.10",
+            extra={"pbk": f"other-pbk-{i}"},
+            sni=f"cdn{i}.example.com",
+        )
+        for i in range(15)
+    ]
+    best = select_best_configs(
+        clustered + others,
+        score_threshold=70,
+        max_publish=30,
+    )
+    cluster_in_best = [c for c in best if ipv4_prefix24(c.host) == "169.40.42.0/24"]
+    pbk_in_best = [c for c in best if (c.extra or {}).get("pbk") == cluster_pbk]
+    assert len(cluster_in_best) <= 2
+    assert len(pbk_in_best) <= 2
+    # Greedy fill continues from other networks instead of stopping at the cluster.
+    assert len(best) == 17  # 2 from cluster + all 15 others
+    other_hosts = {c.host for c in others}
+    assert sum(1 for c in best if c.host in other_hosts) == 15
+    # Highest-score cluster members win the two slots (lowest latency among 95s).
+    assert {c.host for c in cluster_in_best} == {"169.40.42.1", "169.40.42.2"}
+
+
+def test_select_best_caps_same_pbk_across_networks():
+    """Same Reality pbk is capped even when IPs sit on different /24s."""
+    pbk = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
+    same_key = [
+        _cfg(
+            i,
+            score=90,
+            latency_ms=15 + i,
+            host=f"8.8.{i}.1",
+            extra={"pbk": pbk},
+            sni="yahoo.com",
+        )
+        for i in range(8)
+    ]
+    filler = [_cfg(50 + i, score=75, latency_ms=80, host=f"9.9.{i}.1") for i in range(5)]
+    best = select_best_configs(same_key + filler, score_threshold=70, max_publish=10)
+    assert sum(1 for c in best if (c.extra or {}).get("pbk") == pbk) <= 2
+    assert len(best) == 7  # 2 pbk + 5 filler
+
+
+def test_select_best_hostname_uses_host_key_not_slash24():
+    clones = [
+        _cfg(i, score=88, latency_ms=30 + i, host="cdn.example.net", extra={"pbk": f"k{i}"})
+        for i in range(6)
+    ]
+    other = _cfg(20, score=70, latency_ms=90, host="other.example.net")
+    best = select_best_configs(clones + [other], score_threshold=70, max_publish=10)
+    assert sum(1 for c in best if c.host == "cdn.example.net") <= 2
+    assert any(c.host == "other.example.net" for c in best)
+
+
+def test_publisher_best_diversity_does_not_shrink_all(tmp_path: Path):
+    settings = {
+        "publish": {
+            "output_dir": str(tmp_path / "subs"),
+            "all_file": "all.txt",
+            "all_base64_file": "all.base64",
+            "best_file": "best.txt",
+            "best_base64_file": "best.base64",
+            "by_protocol_dir": "by-protocol",
+            "sanitize_remarks": True,
+            "remark_prefix": "⚡",
+        },
+        "pipeline": {
+            "max_healthy_publish": 150,
+            "best_score_threshold": 70,
+            "best_max_publish": 30,
+            "best_max_per_prefix24": 2,
+            "best_max_per_reality_pbk": 2,
+        },
+    }
+    clustered = [
+        _cfg(
+            i,
+            score=92,
+            latency_ms=12 + i,
+            host=f"169.40.42.{i + 1}",
+            extra={"pbk": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC"},
+            sni="yahoo.com",
+        )
+        for i in range(21)
+    ]
+    diverse = [_cfg(200 + i, score=71, latency_ms=100 + i, host=f"198.51.{i}.8") for i in range(10)]
+    paths = Publisher(settings).publish(clustered + diverse)
+    all_lines = [ln for ln in paths["all"].read_text(encoding="utf-8").splitlines() if ln]
+    best_lines = [ln for ln in paths["best"].read_text(encoding="utf-8").splitlines() if ln]
+    index = json.loads(paths["index"].read_text(encoding="utf-8"))
+    assert len(all_lines) == 31
+    assert index["count_all"] == 31
+    # 21 clustered + 10 others would fill 30 without caps; with caps, 2+10=12.
+    assert len(best_lines) == 12
+    assert index["count_best"] == 12
+    assert sum("169.40.42." in ln for ln in best_lines) <= 2
+    assert sum("169.40.42." in ln for ln in all_lines) == 21
 
 
 def test_publisher_best_is_strict_subset(tmp_path: Path):
@@ -97,6 +243,8 @@ def test_publisher_defaults_match_yaml_and_cap_best(tmp_path: Path):
     testing = yaml_settings["testing"]
     assert pipe["best_score_threshold"] == 70
     assert pipe["best_max_publish"] == 30
+    assert pipe["best_max_per_prefix24"] == 2
+    assert pipe["best_max_per_reality_pbk"] == 2
     assert pipe["max_healthy_publish"] == 150
     assert testing["throughput_enabled"] is True
     assert testing["throughput_bytes"] == 262144
@@ -107,6 +255,8 @@ def test_publisher_defaults_match_yaml_and_cap_best(tmp_path: Path):
     pub = Publisher({"publish": {"output_dir": str(tmp_path / "subs")}, "pipeline": {}})
     assert pub.best_threshold == 70
     assert pub.best_max_publish == 30
+    assert pub.best_max_per_prefix24 == 2
+    assert pub.best_max_per_reality_pbk == 2
     assert pub.max_healthy == 150
 
     configs = [_cfg(i, score=50 + (i % 45), latency_ms=200) for i in range(60)]
