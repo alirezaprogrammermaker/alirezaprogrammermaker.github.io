@@ -82,3 +82,4 @@ hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?sni=ru1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A13334ms-0.2M-82
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A14313ms-0.2M-83
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A15768ms-0.2M-84
+hy2://mkL3AfdSZIpTWRB9TcWPn9vywPGN89MRHg3ToRDj@gta.internet-card.sbs:443/?insecure=1&sni=gta.internet-card.sbs#%E2%9A%A118389ms-0.1M-85
