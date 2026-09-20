@@ -18,9 +18,12 @@ pipeline:
   checkpoint_interval_sec: 120
   max_configs_to_test_per_run: 1200
   retest_healthy_first: true
-  max_healthy_publish: 300
+  # `all` stays broader than `best`; keep this well above best_max_publish.
+  max_healthy_publish: 150
   max_telegram_post_per_run: 15
-  best_score_threshold: 40
+  # Strict quality gate so best cannot collapse to ≈all.
+  best_score_threshold: 70
+  best_max_publish: 30
   # Drop if not reconfirmed (~6 missed 2-min watches)
   healthy_max_age_hours: 0.2
 
@@ -48,25 +51,46 @@ validation:
   max_port: 65535
 
 testing:
-  # Prefer real proxy probe via Xray when binary is available.
+  # Prefer real proxy probe via Xray (and sing-box for hysteria2) when binaries exist.
+  # hysteria2/hy2 never use bare TCP/TLS success — fail closed if sing-box is missing.
   mode: auto  # auto | xray | tcp
   probe_url: https://www.cloudflare.com/cdn-cgi/trace
   tcp_timeout_sec: 5
   tls_timeout_sec: 8
   xray_timeout_sec: 20
+  singbox_timeout_sec: 20
   concurrency: 16
   watch_concurrency: 16
   # Latency scoring (ms)
   score_latency_excellent_ms: 400
   score_latency_good_ms: 1200
   score_latency_ok_ms: 3000
+  # Combined score = latency_weight * latency_score + throughput_weight * throughput_score
+  # (normalized). Missing Mbps after a real proxy probe applies score_throughput_missing_penalty
+  # to the latency score (no fake Mbps). TCP-only probes do not attempt throughput.
+  score_latency_weight: 0.65
+  score_throughput_weight: 0.35
+  score_throughput_missing_penalty: 0.20
+  score_throughput_excellent_mbps: 8
+  score_throughput_good_mbps: 3
+  score_throughput_ok_mbps: 1
+  # Throughput / Mbps probe through the same SOCKS proxy after a successful HTTP probe
+  throughput_enabled: true
+  throughput_bytes: 262144
+  throughput_timeout_sec: 15
+  throughput_url: "https://speed.cloudflare.com/__down?bytes={bytes}"
   # Local SOCKS base port for xray probes (each worker + offset)
   local_socks_base_port: 21000
+  singbox_socks_base_port: 22000
   # Parallel health-watch uses a separate port range / workdir
   watch_socks_base_port: 26000
+  watch_singbox_socks_base_port: 27000
   watch_xray_workdir: state/runtime/xray-watch
+  watch_singbox_workdir: state/runtime/singbox-watch
   xray_bin: bin/xray
   xray_workdir: state/runtime/xray
+  singbox_bin: bin/sing-box
+  singbox_workdir: state/runtime/singbox
 
 publish:
   # GitHub Pages paths (committed under repo root for Pages serving)
@@ -92,6 +116,7 @@ telegram:
     ✅ Active config
     Protocol: {protocol}
     Latency: {latency_ms} ms
+    Throughput: {throughput_mbps} Mbps
     Score: {score}
 
     `{link}`
