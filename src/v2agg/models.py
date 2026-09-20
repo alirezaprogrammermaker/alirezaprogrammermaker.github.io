@@ -28,6 +28,7 @@ class ProxyConfig:
 
     # Runtime / health fields (not part of outbound identity)
     latency_ms: float | None = None
+    throughput_mbps: float | None = None
     score: float = 0.0
     alive: bool = False
     fail_count: int = 0

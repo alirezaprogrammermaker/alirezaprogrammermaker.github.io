@@ -5,9 +5,10 @@ from pathlib import Path
 from typing import Any
 
 from v2agg.models import ProxyConfig
-from v2agg.parse.normalize import rewrite_remark, sanitize_remark
+from v2agg.parse.normalize import rewrite_remark
 from v2agg.util.encoding import encode_subscription_base64
 from v2agg.util.logging import get_logger
+from v2agg.util.ranking import remark_with_latency, select_best_configs
 
 logger = get_logger(__name__)
 
@@ -25,21 +26,32 @@ class Publisher:
         self.by_proto = pub.get("by_protocol_dir") or "by-protocol"
         self.sanitize = bool(pub.get("sanitize_remarks", True))
         self.remark_prefix = pub.get("remark_prefix") or "⚡"
-        self.max_healthy = int((settings.get("pipeline") or {}).get("max_healthy_publish", 200))
-        self.best_threshold = float((settings.get("pipeline") or {}).get("best_score_threshold", 40))
+        pipe = settings.get("pipeline") or {}
+        # Defaults must match config/settings.yaml so a missed YAML key still
+        # keeps `best` a strict Top-N subset of `all`.
+        self.max_healthy = int(pipe.get("max_healthy_publish", 150))
+        self.best_threshold = float(pipe.get("best_score_threshold", 70))
+        self.best_max_publish = int(pipe.get("best_max_publish", 30))
 
     def _public_links(self, configs: list[ProxyConfig]) -> list[str]:
         links: list[str] = []
         for i, cfg in enumerate(configs, start=1):
-            remark = sanitize_remark(cfg.remark, self.remark_prefix, i) if self.sanitize else (cfg.remark or f"{self.remark_prefix}{i}")
+            if self.sanitize:
+                remark = remark_with_latency(cfg, self.remark_prefix, i)
+            else:
+                remark = cfg.remark or f"{self.remark_prefix}{i}"
             links.append(rewrite_remark(cfg.raw, remark))
         return links
 
     def publish(self, healthy: list[ProxyConfig]) -> dict[str, Path]:
         alive = [c for c in healthy if c.alive]
-        alive.sort(key=lambda c: (-c.score, c.latency_ms or 99999))
+        alive.sort(key=lambda c: (-c.score, c.latency_ms if c.latency_ms is not None else 99999))
         alive = alive[: self.max_healthy]
-        best = [c for c in alive if c.score >= self.best_threshold][: max(20, self.max_healthy // 4)]
+        best = select_best_configs(
+            alive,
+            score_threshold=self.best_threshold,
+            max_publish=self.best_max_publish,
+        )
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
         by_dir = self.output_dir / self.by_proto
