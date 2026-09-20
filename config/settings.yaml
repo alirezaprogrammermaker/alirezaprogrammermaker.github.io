@@ -24,10 +24,10 @@ pipeline:
   # Strict quality gate so best cannot collapse to ≈all.
   best_score_threshold: 70
   best_max_publish: 30
-  # Diversity caps for `best` only (`all` stays broader). Greedy fill after
-  # score/latency sort: max N per IPv4 /24 (hostnames use a host-key instead)
-  # and max N per Reality pbk / (pbk, sni). Stops a single colo+/24 from
-  # occupying the whole best list when Actions probes from abroad succeed.
+  # Diversity caps for `best` only (`all` stays broader). Actions vantage ≠
+  # Iran path: a Reality /24 can score high from abroad and fail from Iran.
+  # Phase 1: score/latency greedy with these caps. Phase 2: if best is not
+  # full, backfill lower-score alive nodes that add a new /24 or pbk.
   best_max_per_prefix24: 2
   best_max_per_reality_pbk: 2
   # Drop if not reconfirmed (~6 missed 2-min watches)

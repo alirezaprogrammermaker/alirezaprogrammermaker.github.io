@@ -84,41 +84,76 @@ def select_best_configs(
     max_per_prefix24: int = 2,
     max_per_reality_pbk: int = 2,
 ) -> list[ProxyConfig]:
-    """Alive configs with score ≥ threshold, best-first, with diversity caps.
+    """Pick ``best``: score-first, then diversity backfill, always with caps.
 
-    Sort by score then latency, then greedily fill until ``max_publish`` while
-    keeping at most ``max_per_prefix24`` per IPv4 /24 (or per hostname) and
-    at most ``max_per_reality_pbk`` per Reality ``pbk`` and per ``(pbk, sni)``.
-    Caps ≤ 0 disable that constraint. Mbps / score filters are unchanged.
+    Phase 1: alive configs with score ≥ threshold, sorted by score then latency,
+    greedily filled while keeping at most ``max_per_prefix24`` per IPv4 /24
+    (or per hostname) and ``max_per_reality_pbk`` per Reality ``pbk`` /
+    ``(pbk, sni)``. Caps ≤ 0 disable that constraint.
+
+    Phase 2: if still under ``max_publish``, fill remaining slots from lower-score
+    *alive* survivors that add a **new** /24 or **new** pbk (prefer path
+    diversity over raw Mbps). Caps still apply — a 169.40.42.0/24 Reality
+    cluster cannot occupy more than two slots. Mbps / hy2 scoring is unchanged.
     """
-    ranked = sorted(
-        (c for c in alive if c.alive and c.score >= score_threshold),
-        key=_best_sort_key,
-    )
     cap = max(0, int(max_publish))
     net_cap = int(max_per_prefix24)
     pbk_cap = int(max_per_reality_pbk)
     selected: list[ProxyConfig] = []
+    selected_fps: set[str] = set()
     net_counts: Counter[str] = Counter()
     pbk_counts: Counter[str] = Counter()
     pair_counts: Counter[str] = Counter()
 
-    for cfg in ranked:
-        if len(selected) >= cap:
-            break
+    def _fits(cfg: ProxyConfig, *, require_new: bool) -> bool:
         net_key = network_diversity_key(cfg)
-        if net_cap > 0 and net_counts[net_key] >= net_cap:
-            continue
         pbk = reality_pbk(cfg)
-        if pbk_cap > 0 and pbk and pbk_counts[pbk] >= pbk_cap:
-            continue
         pair = reality_pbk_sni_key(cfg)
+        if net_cap > 0 and net_counts[net_key] >= net_cap:
+            return False
+        if pbk_cap > 0 and pbk and pbk_counts[pbk] >= pbk_cap:
+            return False
         if pbk_cap > 0 and pair and pair_counts[pair] >= pbk_cap:
-            continue
+            return False
+        if require_new:
+            new_net = net_counts[net_key] == 0
+            new_pbk = bool(pbk) and pbk_counts[pbk] == 0
+            if not (new_net or new_pbk):
+                return False
+        return True
+
+    def _add(cfg: ProxyConfig) -> None:
+        fp = cfg.ensure_fingerprint()
+        if fp in selected_fps:
+            return
         selected.append(cfg)
-        net_counts[net_key] += 1
+        selected_fps.add(fp)
+        net_counts[network_diversity_key(cfg)] += 1
+        pbk = reality_pbk(cfg)
         if pbk:
             pbk_counts[pbk] += 1
+        pair = reality_pbk_sni_key(cfg)
         if pair:
             pair_counts[pair] += 1
+
+    high = sorted(
+        (c for c in alive if c.alive and c.score >= score_threshold),
+        key=_best_sort_key,
+    )
+    for cfg in high:
+        if len(selected) >= cap:
+            break
+        if _fits(cfg, require_new=False):
+            _add(cfg)
+
+    if len(selected) < cap:
+        rest = sorted(
+            (c for c in alive if c.alive and c.ensure_fingerprint() not in selected_fps),
+            key=_best_sort_key,
+        )
+        for cfg in rest:
+            if len(selected) >= cap:
+                break
+            if _fits(cfg, require_new=True):
+                _add(cfg)
     return selected

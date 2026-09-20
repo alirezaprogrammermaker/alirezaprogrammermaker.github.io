@@ -124,6 +124,46 @@ def test_select_best_diversity_caps_prefix24_and_pbk():
     assert {c.host for c in cluster_in_best} == {"169.40.42.1", "169.40.42.2"}
 
 
+def test_select_best_backfills_lower_score_new_networks():
+    """If best is not full after the cluster cap, prefer new /24/pbk over Mbps clones."""
+    cluster_pbk = "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD"
+    clustered = [
+        _cfg(
+            i,
+            score=99.0,
+            latency_ms=5 + i,
+            mbps=20.0,
+            host=f"169.40.42.{i + 1}",
+            extra={"pbk": cluster_pbk},
+            sni="yahoo.com",
+        )
+        for i in range(20)
+    ]
+    # Below the quality threshold, but different networks — the Iran-usable set.
+    survivors = [
+        _cfg(
+            200 + i,
+            score=45.0,
+            latency_ms=200 + i,
+            mbps=1.0,
+            host=f"185.10.{i}.4",
+            extra={"pbk": f"iran-pbk-{i}"},
+            sni=f"s{i}.example.net",
+        )
+        for i in range(10)
+    ]
+    best = select_best_configs(
+        clustered + survivors,
+        score_threshold=70,
+        max_publish=30,
+    )
+    assert sum(1 for c in best if ipv4_prefix24(c.host) == "169.40.42.0/24") <= 2
+    assert sum(1 for c in best if (c.extra or {}).get("pbk") == cluster_pbk) <= 2
+    survivor_hosts = {c.host for c in survivors}
+    assert {c.host for c in best if c.host in survivor_hosts} == survivor_hosts
+    assert len(best) == 12  # 2 cluster + 10 diverse lower-score
+
+
 def test_select_best_caps_same_pbk_across_networks():
     """Same Reality pbk is capped even when IPs sit on different /24s."""
     pbk = "BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB"
@@ -265,8 +305,10 @@ def test_publisher_defaults_match_yaml_and_cap_best(tmp_path: Path):
     assert index["count_all"] == 60
     assert index["count_best"] <= 30
     assert index["count_best"] < index["count_all"]
-    # With threshold 70, only scores >= 70 (50+20..50+44 → 70-94) qualify
-    assert index["count_best"] == min(30, sum(1 for c in configs if c.score >= 70))
+    # Phase 1 takes scores >= 70; unused slots backfill diverse lower-score nodes.
+    above = sum(1 for c in configs if c.score >= 70)
+    assert above <= index["count_best"] <= 30
+    assert index["count_best"] == 30
 
 
 def test_score_throughput_knees():
@@ -443,7 +485,7 @@ logging:
     assert metrics.published == 40
     index = json.loads((tmp_path / "subs" / "index.json").read_text(encoding="utf-8"))
     assert index["count_all"] == 40
-    assert index["count_best"] == 15  # 15 nodes with score 95
+    assert index["count_best"] == 30  # 15 score-95 + 15 diverse backfill (cap)
     assert index["count_best"] < index["count_all"]
     best_txt = (tmp_path / "subs" / "best.txt").read_text(encoding="utf-8")
     assert "secret-source" not in best_txt
