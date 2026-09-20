@@ -27,4 +27,4 @@ hy2://YutbgyXL1mGaSlBXDoEucWvYbrDCINgUcQ6R6_At5Pjr2xCc@go.wwwinternetvideo.click
 vless://b3a11068-1a7e-4643-85de-7c82cce46943@185.223.57.16:33743?security=reality&encryption=none&pbk=wGMBs7bvzyzA0-OUiwSkOOTDEMdxEOsSdRzxiP8GGQY&fp=chrome&type=grpc&serviceName=TunService&sni=www.google.com#%E2%9A%A1559ms-3.0M-27
 hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A1891ms-2.1M-28
 vless://b3a11068-1a7e-4643-85de-7c82cce46943@185.223.57.10:33743?mode=gun&security=reality&encryption=none&pbk=wGMBs7bvzyzA0-OUiwSkOOTDEMdxEOsSdRzxiP8GGQY&fp=chrome&spx=/&type=grpc&serviceName=TunService&sni=www.google.com#%E2%9A%A1559ms-2.9M-29
-vless://026f58a9-b36e-4204-8f8d-54c5374163da@84.32.186.112:443?security=reality&encryption=none&pbk=naFxXMoZGp3dHSEMiupvt7FsYtnxONkSN90c2JLWl38&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=api37.betust.net&sid=974acf45#%E2%9A%A1385ms-0.4M-30
+hy2://H7mP2xY9kJ4nQ8wR5tF6vB3z@vpn-au-002.fastervpn.world:443/?insecure=1&sni=whatsapp.com#%E2%9A%A1839ms-1.4M-30
