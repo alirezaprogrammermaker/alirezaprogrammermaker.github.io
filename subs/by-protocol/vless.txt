@@ -53,7 +53,8 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.223:443?security=reality&
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A11492ms-0.3M-53
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A11532ms-0.3M-54
 vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.42.6:443?security=reality&encryption=none&pbk=sS3x_ZygtA9uZ5WaYm7pHjy0_lPNUUK7kOSLz0BNhCs&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=app6.betust.net&sid=54ac91da#%E2%9A%A12530ms-0.8M-55
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A13055ms-0.4M-56
-vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.44.89:443?security=reality&encryption=none&pbk=Fgd7fSq-ZXnAZd3GUYGEfTyiz9wno4IWVIcs7-Narwg&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=app12.betust.net&sid=f73ac93d#%E2%9A%A116721ms-1.1M-57
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A13497ms-0.4M-58
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A12989ms-0.4M-59
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A12599ms-56
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A13055ms-0.4M-57
+vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.44.89:443?security=reality&encryption=none&pbk=Fgd7fSq-ZXnAZd3GUYGEfTyiz9wno4IWVIcs7-Narwg&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=app12.betust.net&sid=f73ac93d#%E2%9A%A116721ms-1.1M-58
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A13497ms-0.4M-59
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A12989ms-0.4M-60
