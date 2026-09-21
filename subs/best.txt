@@ -26,5 +26,5 @@ vless://026f58a9-b36e-4204-8f8d-54c5374163da@app15.betust.net:443?security=reali
 vless://06c4e938-2954-478f-a870-ca1b163e30e9@94.183.170.135:443?encryption=none&path=/&security=none&type=ws#%E2%9A%A1500ms-2.0M-26
 vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.44.89:443?security=reality&encryption=none&pbk=Fgd7fSq-ZXnAZd3GUYGEfTyiz9wno4IWVIcs7-Narwg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=app12.betust.net&sid=f73ac93d#%E2%9A%A1679ms-1.5M-27
 vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.24.201:443?type=tcp&security=reality&sni=app11.betust.net&fp=chrome&pbk=XhzNlmMTdYr2pYTqiNNP6qWe7BkAgVHU-kZWXc9u9hY&sid=91c2269c&encryption=none&flow=xtls-rprx-vision#%E2%9A%A1784ms-1.4M-28
-vless://5fcdc9b7-e70f-4a5c-85c3-e018ad818326@82.24.203.20:2087?encryption=none&path=%2Ffd5ba98a3970&security=none&type=ws#%E2%9A%A1849ms-1.4M-29
-vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&encryption=none&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com&sid=fa3ea655619a3e78#%E2%9A%A1560ms-0.2M-30
+vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.77.241:443?security=reality&encryption=none&pbk=YczbievYAOeZIypa58aRpil6XbfdyifK_0cFJWn8-yg&headerType=none&fp=chrome&spx=/&type=tcp&flow=xtls-rprx-vision&sni=api.betust.net&sid=d6c172d3#%E2%9A%A1888ms-1.1M-29
+vless://5fcdc9b7-e70f-4a5c-85c3-e018ad818326@82.24.203.20:2087?encryption=none&path=%2Ffd5ba98a3970&security=none&type=ws#%E2%9A%A1849ms-1.4M-30
