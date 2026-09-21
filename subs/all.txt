@@ -82,3 +82,4 @@ ss://aes-256-gcm:Y6R9pAtvxxzmGC@51.222.200.165:5000#%E2%9A%A13054ms-0.6M-81
 vless://026f58a9-b36e-4204-8f8d-54c5374163da@188.225.24.201:443?type=tcp&security=reality&sni=app11.betust.net&fp=chrome&pbk=XhzNlmMTdYr2pYTqiNNP6qWe7BkAgVHU-kZWXc9u9hY&sid=91c2269c&encryption=none&flow=xtls-rprx-vision#%E2%9A%A12621ms-82
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A14268ms-0.2M-83
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?sni=ru1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A14839ms-0.2M-84
+hysteria2://Telegram-vpnjey@77.110.96.201:36264?sni=se.vpnjey2.dpdns.org&alpn=h3&obfs=salamander&obfs-password=Telegram@vpnjey&insecure=1#%E2%9A%A16113ms-85
