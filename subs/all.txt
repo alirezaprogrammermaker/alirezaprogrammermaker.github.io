@@ -65,4 +65,6 @@ hy2://YutbgyXL1mGaSlBXDoEucWvYbrDCINgUcQ6R6_At5Pjr2xCc@go.wwwinternetvideo.click
 vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&security=reality&encryption=none&pbk=99MRki6b93wC-hhDHe9yq3IXE3KtPGw4RkFAnpI-8gg&fp=firefox&type=grpc&serviceName=app.v1.PushService&sni=md5.univesalsrv.com&sid=aa9884f2982b7d3c#%E2%9A%A1848ms-1.8M-65
 hy2://1beb216e3f60aea9555dae60d219a5ca@152-69-231-175.liao.kdns.fr:50160/?sni=152-69-231-175.liao.kdns.fr#%E2%9A%A11134ms-1.9M-66
 hy2://19f72087-4591-4d72-930b-2697078ec2be@es1.xiaoliyu.cyou:4433/?insecure=1&sni=es1.xiaoliyu.cyou#%E2%9A%A11216ms-3.8M-67
-hy2://19f72087-4591-4d72-930b-2697078ec2be@se.xiaoliyu.cyou:4433/?insecure=1&sni=se.xiaoliyu.cyou#%E2%9A%A13256ms-3.2M-68
+hy2://H7mP2xY9kJ4nQ8wR5tF6vB3z@vpn-au-002.fastervpn.world:443/?insecure=1&sni=whatsapp.com#%E2%9A%A11012ms-1.4M-68
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11120ms-69
+hy2://19f72087-4591-4d72-930b-2697078ec2be@se.xiaoliyu.cyou:4433/?insecure=1&sni=se.xiaoliyu.cyou#%E2%9A%A13256ms-3.2M-70
