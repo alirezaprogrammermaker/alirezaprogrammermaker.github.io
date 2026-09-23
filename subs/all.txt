@@ -74,3 +74,4 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&se
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws#%E2%9A%A15649ms-1.1M-74
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A15859ms-1.0M-75
 ss://chacha20-ietf-poly1305:tunnel-astrovpn_official@179.61.138.73:8444#%E2%9A%A17071ms-0.6M-76
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A16027ms-0.3M-77
