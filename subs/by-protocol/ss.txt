@@ -1,3 +1,3 @@
-ss://chacha20-ietf-poly1305:FD3rCuOsxOay@15.235.75.71:8388#%E2%9A%A1226ms-4.8M-1
-ss://chacha20-ietf-poly1305:c58d16e593d44f42@158.173.221.214:11001#%E2%9A%A1503ms-1.6M-2
-ss://chacha20-ietf-poly1305:tunnel-astrovpn_official@179.61.138.73:8444#%E2%9A%A1793ms-0.8M-3
+ss://chacha20-ietf-poly1305:FD3rCuOsxOay@15.235.75.71:8388#%E2%9A%A1191ms-5.4M-1
+ss://chacha20-ietf-poly1305:c58d16e593d44f42@158.173.221.214:11001#%E2%9A%A1444ms-2.1M-2
+ss://chacha20-ietf-poly1305:tunnel-astrovpn_official@179.61.138.73:8444#%E2%9A%A1616ms-2.0M-3
