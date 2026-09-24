@@ -8,6 +8,7 @@ hysteria2://cd74c0a406664a5bc0bac098220a2468@2.27.59.206:443?security=tls&obfs=s
 hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?sni=hy2-new.aspidnet.xyz&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566#%E2%9A%A11093ms-0.9M-8
 hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?security=tls&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566&insecure=0&sni=hy2-new.aspidnet.xyz#%E2%9A%A11052ms-0.7M-9
 hysteria2://cd74c0a406664a5bc0bac098220a2468@2.27.59.206:443?sni=de1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A11222ms-1.8M-10
-hysteria2://HowdyHysteria2023w0W@hysteria.udpgw.com:8443/?insecure=1&obfs=salamander&obfs-password=HysteriaHowdy&sni=sni-here.com#%E2%9A%A15560ms-1.7M-11
-hysteria2://HowdyHysteria2023w0W@51.15.19.206:8443/?insecure=1&obfs=salamander&obfs-password=HysteriaHowdy&sni=sni-here.com#%E2%9A%A110380ms-1.0M-12
-hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A12997ms-0.2M-13
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A15864ms-2.7M-11
+hysteria2://HowdyHysteria2023w0W@hysteria.udpgw.com:8443/?insecure=1&obfs=salamander&obfs-password=HysteriaHowdy&sni=sni-here.com#%E2%9A%A15560ms-1.7M-12
+hysteria2://HowdyHysteria2023w0W@51.15.19.206:8443/?insecure=1&obfs=salamander&obfs-password=HysteriaHowdy&sni=sni-here.com#%E2%9A%A110380ms-1.0M-13
+hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A12997ms-0.2M-14
