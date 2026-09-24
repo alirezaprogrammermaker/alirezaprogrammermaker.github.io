@@ -77,4 +77,5 @@ hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?sni=ru1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A1952ms-0.7M-77
 hysteria2://cd74c0a406664a5bc0bac098220a2468@2.27.59.206:443?sni=de1.sferavpn.pro&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0#%E2%9A%A11856ms-3.2M-78
 hysteria2://cd74c0a406664a5bc0bac098220a2468@2.27.59.206:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=de1.sferavpn.pro#%E2%9A%A11848ms-3.1M-79
-vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&encryption=none&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com&sid=fa3ea655619a3e78#%E2%9A%A19347ms-0.2M-80
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A16192ms-0.4M-80
+vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&encryption=none&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com&sid=fa3ea655619a3e78#%E2%9A%A19347ms-0.2M-81
