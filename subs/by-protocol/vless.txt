@@ -50,4 +50,5 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&se
 vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&security=reality&encryption=none&pbk=99MRki6b93wC-hhDHe9yq3IXE3KtPGw4RkFAnpI-8gg&fp=firefox&type=grpc&serviceName=app.v1.PushService&sni=md5.univesalsrv.com&sid=aa9884f2982b7d3c#%E2%9A%A1944ms-1.5M-50
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A11002ms-1.5M-51
 vless://0370b162-baff-4757-86cc-cce4bf07f6f1@78.111.89.171:443?security=reality&encryption=none&pbk=lYcMPEgf6ePmF_d8RXR5fsVorycW37v_ECl-fz_H6w4&headerType=none&fp=chrome&type=tcp&sni=www.cloudflare.com&sid=cfe08c23a85f24#%E2%9A%A16489ms-3.0M-52
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A16227ms-0.4M-53
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11922ms-53
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A16227ms-0.4M-54
