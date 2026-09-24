@@ -56,3 +56,4 @@ vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A19568ms-1.5M-56
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A14144ms-0.5M-57
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A18115ms-0.1M-58
+trojan://pkj3BBnG2NE4wD-72SwgzNcfaHSes-dr@194.93.61.120:443?security=reality&pbk=yAJlHrab9FWfz9f6Ya4xsBaBjnPytEQFqpVgs1aPHB0&headerType=none&fp=chrome&type=tcp&sni=16.img.avito.st&sid=43dcff53849b81e6#%E2%9A%A120034ms-59
