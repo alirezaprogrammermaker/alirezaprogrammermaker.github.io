@@ -1,15 +1,13 @@
 /**
- * // SLOT w04 — Gateway auth middleware
- * External apps: Authorization: Bearer <issued_api_key>
+ * Auth middleware helpers (scaffold + w04/w07).
  */
 
 import type { Env } from "../env";
+import { extractBearerToken } from "../gateway/auth";
+import { lookupBySecret } from "../admin";
 
 export function extractBearer(request: Request): string | null {
-  const header = request.headers.get("Authorization");
-  if (!header) return null;
-  const m = /^Bearer\s+(.+)$/i.exec(header.trim());
-  return m?.[1]?.trim() || null;
+  return extractBearerToken(request);
 }
 
 export function jsonError(
@@ -23,10 +21,6 @@ export function jsonError(
   );
 }
 
-/**
- * Require a valid issued gateway API key.
- * Until w04 lands, ADMIN_TOKEN (if set) is accepted as a bootstrap bypass for local dev.
- */
 export async function requireApiKey(
   request: Request,
   env: Env,
@@ -35,26 +29,16 @@ export async function requireApiKey(
   if (!token) {
     return jsonError(401, "Missing Authorization Bearer token", "unauthorized");
   }
-
-  // Bootstrap: allow ADMIN_TOKEN while key store is unfinished
   if (env.ADMIN_TOKEN && token === env.ADMIN_TOKEN) {
     return null;
   }
-
-  // SLOT w04: await verifyApiKey(env.API_KEYS, token)
   try {
-    const { verifyApiKey } = await import("./keys");
-    await verifyApiKey(env.API_KEYS, token);
-    return null;
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("SLOT w04")) {
-      return jsonError(
-        501,
-        "API key verification not implemented (SLOT w04). Set ADMIN_TOKEN for bootstrap.",
-        "not_implemented",
-      );
+    const rec = await lookupBySecret(env.API_KEYS, token);
+    if (!rec || rec.revokedAt) {
+      return jsonError(401, "Invalid API key", "unauthorized");
     }
+    return null;
+  } catch {
     return jsonError(401, "Invalid API key", "unauthorized");
   }
 }

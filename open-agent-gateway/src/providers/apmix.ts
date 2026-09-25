@@ -1,58 +1,58 @@
 /**
- * // SLOT w02 — apmix OpenAI-compatible adapter (https://api.apmix.ai/v1)
- * Minimal working stub so the scaffold can call apmix when secrets are set.
+ * apmix.ai adapter — OpenAI-compatible upstream with apmix defaults.
+ * Base: https://api.apmix.ai/v1  Model: gpt-6-luna-free (free tier)
  */
 
-import type { Env } from "../env";
-import type { CompleteRequest, CompleteResult, ProviderAdapter } from "./types";
+import { OpenAICompatibleProvider } from "./openai-compatible";
+import type { ProviderConfig } from "./types";
 
-const APMIX_BASE = "https://api.apmix.ai/v1";
+export const APMIX_DEFAULT_BASE_URL = "https://api.apmix.ai/v1";
+export const APMIX_DEFAULT_MODEL = "gpt-6-luna-free";
 
-export function createApmixProvider(env: Env): ProviderAdapter {
-  return {
-    id: "apmix",
-    async complete(req: CompleteRequest): Promise<CompleteResult> {
-      const apiKey = env.APMIX_API_KEY;
-      if (!apiKey) {
-        throw new Error("APMIX_API_KEY secret is not configured");
-      }
+export interface ApmixOptions {
+  apiKey: string;
+  baseUrl?: string;
+  defaultHeaders?: Record<string, string>;
+  allowPrivateBaseUrl?: boolean;
+  fetch?: typeof fetch;
+  defaultModel?: string;
+}
 
-      // SLOT w02: harden streaming, error mapping, retries
-      const res = await fetch(`${APMIX_BASE}/chat/completions`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: req.model,
-          messages: req.messages,
-          stream: false,
-          temperature: req.temperature,
-          max_tokens: req.max_tokens,
-        }),
-      });
+export class ApmixProvider extends OpenAICompatibleProvider {
+  readonly defaultModel: string;
 
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`apmix upstream ${res.status}: ${text.slice(0, 200)}`);
-      }
+  constructor(opts: ApmixOptions) {
+    const config: ProviderConfig = {
+      id: "apmix",
+      baseUrl: opts.baseUrl ?? APMIX_DEFAULT_BASE_URL,
+      apiKey: opts.apiKey,
+      defaultHeaders: opts.defaultHeaders,
+      allowPrivateBaseUrl: opts.allowPrivateBaseUrl,
+      fetch: opts.fetch,
+      defaultModel: opts.defaultModel ?? APMIX_DEFAULT_MODEL,
+      chatPath: "/chat/completions",
+    };
+    super(config);
+    this.defaultModel = config.defaultModel ?? APMIX_DEFAULT_MODEL;
+  }
+}
 
-      const data = (await res.json()) as {
-        choices?: Array<{ message?: { content?: string }; finish_reason?: string }>;
-        usage?: {
-          prompt_tokens?: number;
-          completion_tokens?: number;
-          total_tokens?: number;
-        };
-      };
+export function createApmixProvider(
+  apiKey: string,
+  opts: Omit<ApmixOptions, "apiKey"> = {},
+): ApmixProvider {
+  return new ApmixProvider({ apiKey, ...opts });
+}
 
-      return {
-        content: data.choices?.[0]?.message?.content ?? "",
-        finish_reason: data.choices?.[0]?.finish_reason ?? null,
-        usage: data.usage,
-        raw: data,
-      };
-    },
-  };
+/** Convenience: OpenAI official API via same compatible adapter. */
+export function createOpenAIProvider(
+  apiKey: string,
+  opts: { baseUrl?: string; fetch?: typeof fetch } = {},
+): OpenAICompatibleProvider {
+  return new OpenAICompatibleProvider({
+    id: "openai",
+    baseUrl: opts.baseUrl ?? "https://api.openai.com/v1",
+    apiKey,
+    fetch: opts.fetch,
+  });
 }

@@ -29,6 +29,16 @@ curl -s http://localhost:8787/v1/chat/completions \
   -d '{"model":"gpt-6-luna-free","messages":[{"role":"user","content":"hi"}]}'
 ```
 
+## Integration status (w01)
+
+| Slice | Status |
+|-------|--------|
+| w02 providers (openai/apmix) | Integrated under `src/providers/` |
+| w03 anthropic + custom | Integrated under `src/providers/anthropic-style/` |
+| w05 `/v1/chat/completions` | Integrated under `src/gateway/` |
+| w07 admin keys/providers | Integrated under `src/admin/` |
+| w04 / w06 / w08 / w09 / w10 | Slots remain — hanging for fan-out |
+
 ## Source layout (slice slots)
 
 | Path | Owner | Role |
