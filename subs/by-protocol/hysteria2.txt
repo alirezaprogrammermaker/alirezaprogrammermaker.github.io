@@ -5,3 +5,4 @@ hysteria2://HowdyHysteria2023w0W@hysteria.udpgw.com:8443/?insecure=1&obfs=salama
 hysteria2://sxc15led4b0vp5fy@2.26.97.21:8443/?obfs=salamander&obfs-password=8zzng75tz4tf82pj&sni=musicclips.videolinks.ru#%E2%9A%A1479ms-1.7M-5
 hysteria2://my_super_password_123@open.w2m.ink:443?sni=open.w2m.ink&insecure=1#%E2%9A%A1694ms-2.3M-6
 hy2://1beb216e3f60aea9555dae60d219a5ca@152-69-231-175.liao.kdns.fr:50160/?sni=152-69-231-175.liao.kdns.fr#%E2%9A%A1897ms-2.0M-7
+hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?security=tls&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566&insecure=0&sni=hy2-new.aspidnet.xyz#%E2%9A%A128994ms-8
