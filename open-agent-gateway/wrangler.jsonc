@@ -1,0 +1,48 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "open-agent-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ENVIRONMENT": "development",
+    "GATEWAY_DEFAULT_PROVIDER": "apmix",
+    "GATEWAY_DEFAULT_MODEL": "gpt-6-luna-free"
+  },
+  // Create with: wrangler kv namespace create API_KEYS
+  // Then replace ids below (or use wrangler secret / dashboard).
+  "kv_namespaces": [
+    {
+      "binding": "API_KEYS",
+      "id": "00000000000000000000000000000000",
+      "preview_id": "00000000000000000000000000000000"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GatewayAgent",
+        "class_name": "GatewayAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["GatewayAgent"]
+    }
+  ],
+  "env": {
+    "production": {
+      "name": "open-agent-gateway",
+      "vars": {
+        "ENVIRONMENT": "production",
+        "GATEWAY_DEFAULT_PROVIDER": "apmix",
+        "GATEWAY_DEFAULT_MODEL": "gpt-6-luna-free"
+      }
+    }
+  }
+}
