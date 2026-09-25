@@ -49,3 +49,4 @@ vless://47d9b534-8a0a-4bd2-90f1-1d6ade14427e@150.241.101.80:8443?encryption=none
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A11970ms-1.2M-49
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11299ms-50
 vless://02bd8b5a-170b-4a79-8e68-9cec710272c7@nl2.gursub.com:443?flow=xtls-rprx-vision&encryption=none&security=reality&sni=nl2.gursub.com&pbk=ltHl15Wq549qC2JdAtesy-POs6Hwm_BbrlzuwDkWoUk&sid=a1b2c3d4e5f6a1b2&type=tcp&headerType=none#%E2%9A%A12622ms-1.1M-51
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A15817ms-0.4M-52
