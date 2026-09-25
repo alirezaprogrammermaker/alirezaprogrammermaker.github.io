@@ -52,3 +52,5 @@ vless://0370b162-baff-4757-86cc-cce4bf07f6f1@78.111.89.171:443?security=reality&
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A16202ms-0.6M-52
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A16579ms-0.5M-53
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A16003ms-0.2M-54
+hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?sni=hy2-new.aspidnet.xyz&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566#%E2%9A%A112854ms-0.4M-55
+hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?security=tls&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566&insecure=0&sni=hy2-new.aspidnet.xyz#%E2%9A%A122672ms-0.5M-56
