@@ -62,3 +62,4 @@ vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11034ms-62
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11253ms-63
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A11293ms-0.4M-64
+trojan://pkj3BBnG2NE4wD-72SwgzNcfaHSes-dr@194.93.61.120:443?security=reality&pbk=yAJlHrab9FWfz9f6Ya4xsBaBjnPytEQFqpVgs1aPHB0&headerType=none&fp=chrome&type=tcp&sni=16.img.avito.st&sid=43dcff53849b81e6#%E2%9A%A120146ms-2.5M-65
