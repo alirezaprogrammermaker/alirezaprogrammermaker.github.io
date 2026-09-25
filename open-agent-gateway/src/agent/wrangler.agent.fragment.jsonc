@@ -1,0 +1,24 @@
+/**
+ * Merge into open-agent-gateway/wrangler.jsonc (w01 owns the root file).
+ * new_sqlite_classes is required for Agents SDK SQL + setState persistence.
+ */
+{
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "GatewaySessionAgent",
+        "class_name": "GatewaySessionAgent"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "w06-gateway-session-agent-v1",
+      "new_sqlite_classes": ["GatewaySessionAgent"]
+    }
+  ],
+  "vars": {
+    "APMIX_BASE_URL": "https://api.apmix.ai/v1",
+    "DEFAULT_MODEL": "gpt-6-luna-free"
+  }
+}
