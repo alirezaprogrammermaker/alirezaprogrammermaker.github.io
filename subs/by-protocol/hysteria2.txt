@@ -11,3 +11,4 @@ hysteria2://cd74c0a406664a5bc0bac098220a2468@2.27.59.206:443?sni=de1.sferavpn.pr
 hy2://19f72087-4591-4d72-930b-2697078ec2be@se.xiaoliyu.cyou:4433/?insecure=1&sni=se.xiaoliyu.cyou#%E2%9A%A11139ms-2.7M-11
 hy2://1beb216e3f60aea9555dae60d219a5ca@152-69-231-175.liao.kdns.fr:50160/?sni=152-69-231-175.liao.kdns.fr#%E2%9A%A1948ms-1.7M-12
 hysteria2://cd74c0a406664a5bc0bac098220a2468@144.31.49.138:443?security=tls&obfs=salamander&obfs-password=44f1c1e2f8b99e792ceed574627a1eb0&insecure=0&sni=ru1.sferavpn.pro#%E2%9A%A11009ms-0.7M-13
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A15848ms-0.4M-14
