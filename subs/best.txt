@@ -26,5 +26,5 @@ vless://a8e3155b-ceb1-4fcb-bc0c-2e77ec005401@files.noneok.com:443?mode=gun&secur
 vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&security=reality&encryption=none&pbk=99MRki6b93wC-hhDHe9yq3IXE3KtPGw4RkFAnpI-8gg&fp=firefox&type=grpc&serviceName=app.v1.PushService&sni=md5.univesalsrv.com&sid=aa9884f2982b7d3c#%E2%9A%A11228ms-0.7M-26
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.74:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A1231ms-7.0M-27
 ss://chacha20-ietf-poly1305:c58d16e593d44f42@158.173.221.214:11001#%E2%9A%A11681ms-1.0M-28
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@82.39.171.142:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A1713ms-1.6M-29
-vless://02bd8b5a-170b-4a79-8e68-9cec710272c7@217.60.177.195:443?encryption=none&flow=xtls-rprx-vision&fp=chrome&pbk=6S5TksQPwvFJqlj5JJGnuUFF06crL-xFS15111ml9kY&security=reality&sid=529a266bd38ca939&sni=est1.gursub.com&type=tcp#%E2%9A%A17352ms-0.3M-30
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11464ms-29
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A15991ms-0.4M-30
