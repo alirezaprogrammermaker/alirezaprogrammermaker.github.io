@@ -1,0 +1,119 @@
+openapi: 3.1.0
+info:
+  title: open-agent-gateway Admin API
+  version: 1.0.0
+paths:
+  /admin/keys:
+    get:
+      summary: List API keys
+      security: [{ AdminBearer: [] }]
+      responses:
+        "200":
+          description: Prefix-only key metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items: { $ref: "#/components/schemas/ApiKeyPublic" }
+    post:
+      summary: Create API key
+      security: [{ AdminBearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1, maxLength: 64 }
+                scopes:
+                  type: array
+                  items: { type: string }
+                expiresAt:
+                  type: [string, "null"]
+                  format: date-time
+      responses:
+        "201":
+          description: Created; plaintext key returned once
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ApiKeyCreated" }
+  /admin/keys/{id}:
+    get:
+      summary: Get one API key
+      security: [{ AdminBearer: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Prefix-only key
+        "404":
+          description: Not found
+    delete:
+      summary: Revoke API key
+      security: [{ AdminBearer: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Revoked
+        "404":
+          description: Not found
+  /admin/providers:
+    get:
+      summary: List LLM providers
+      security: [{ AdminBearer: [] }]
+      responses:
+        "200":
+          description: Providers without upstream secrets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items: { $ref: "#/components/schemas/ProviderInfo" }
+components:
+  securitySchemes:
+    AdminBearer:
+      type: http
+      scheme: bearer
+  schemas:
+    ApiKeyPublic:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        keyPrefix: { type: string }
+        createdAt: { type: string, format: date-time }
+        revokedAt: { type: [string, "null"] }
+        scopes: { type: array, items: { type: string } }
+        status: { type: string, enum: [active, revoked, expired] }
+    ApiKeyCreated:
+      allOf:
+        - $ref: "#/components/schemas/ApiKeyPublic"
+        - type: object
+          required: [key]
+          properties:
+            key: { type: string, description: Full secret; shown once }
+    ProviderInfo:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        kind: { type: string }
+        adapter: { type: string }
+        enabled: { type: boolean }
+        baseUrlHint: { type: string }
+        models: { type: array, items: { type: string } }
