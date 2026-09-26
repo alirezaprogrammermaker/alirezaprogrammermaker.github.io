@@ -38,7 +38,8 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=
 vless://05488656-d4bf-4634-8b2e-e4ff5a56c7e2@82.118.22.161:443?security=reality&encryption=none&pbk=xY1KpNxaIGmi6jfeudYQ_aaLGQqWK_uHStnwUFd2_2E&headerType=&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com&sid=fa3ea655619a3e78#%E2%9A%A12288ms-0.3M-38
 vless://48ff2b70-e180-582f-8866-d9a2edeed5f5@15.204.97.197:23576?encryption=none&flow=xtls-rprx-vision&fp=&pbk=1y5h2FGWKXTJ9xLPCqPo6Mw7RxoZzh6fGkEQKNxpZ3s&security=reality&sni=fuck.rkn&type=tcp#%E2%9A%A12608ms-0.3M-39
 vless://055a1ce8-2a16-4a0d-a2c2-22826c9b2413@47.253.226.114:443?security=reality&encryption=none&pbk=Svl81isn16RPAFnjtmYw7A6TPnsEPLHuYYaJht65Rzc&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com#%E2%9A%A117592ms-1.5M-40
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A15278ms-0.3M-41
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A15431ms-0.3M-42
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?encryption=none&security=none&type=ws&host=mypanel.unixzone.us&path=/#%E2%9A%A15742ms-0.3M-43
-ss://chacha20-ietf-poly1305:c58d16e593d44f42@158.173.221.214:11001#%E2%9A%A18301ms-0.1M-44
+hy2://f317b5d6-d399-4d3d-a051-89d674ae953c@msk.frkn.org:443/#%E2%9A%A15730ms-0.4M-41
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A15278ms-0.3M-42
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A15431ms-0.3M-43
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?encryption=none&security=none&type=ws&host=mypanel.unixzone.us&path=/#%E2%9A%A15742ms-0.3M-44
+ss://chacha20-ietf-poly1305:c58d16e593d44f42@158.173.221.214:11001#%E2%9A%A18301ms-0.1M-45
