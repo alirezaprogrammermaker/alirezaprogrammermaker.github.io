@@ -1,0 +1,11 @@
+data: {"id":"chatcmpl-fixture0001","object":"chat.completion.chunk","created":1700000000,"model":"gpt-6-luna-free","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-fixture0001","object":"chat.completion.chunk","created":1700000000,"model":"gpt-6-luna-free","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-fixture0001","object":"chat.completion.chunk","created":1700000000,"model":"gpt-6-luna-free","choices":[{"index":0,"delta":{"content":" from"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-fixture0001","object":"chat.completion.chunk","created":1700000000,"model":"gpt-6-luna-free","choices":[{"index":0,"delta":{"content":" the gateway."},"finish_reason":null}]}
+
+data: {"id":"chatcmpl-fixture0001","object":"chat.completion.chunk","created":1700000000,"model":"gpt-6-luna-free","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":null}
+
+data: [DONE]
