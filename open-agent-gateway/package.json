@@ -1,0 +1,15 @@
+{
+  "name": "open-agent-gateway",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Cloudflare Workers AI agent gateway (scaffold + slices)",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250317.0",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}
