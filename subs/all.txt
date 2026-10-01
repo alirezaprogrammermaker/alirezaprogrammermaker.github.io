@@ -43,5 +43,6 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A16221ms-1.0M-43
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?encryption=none&security=none&type=ws&host=mypanel.unixzone.us&path=/#%E2%9A%A14923ms-0.9M-44
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A16144ms-0.9M-45
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A14637ms-0.5M-46
-vless://0c1b7949-fe09-43d9-863f-2c031f66bfc1@kvm1.avenone.ir:8402?encryption=none&security=none&type=tcp#%E2%9A%A111143ms-0.2M-47
+vless://042d2d08-2973-5d10-97ad-3b75f16bbe54@212.147.245.198:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=xwLNHc6jBOg5Ddr1LezwY7I45nP485Qfu1YJXMKwVnI&security=reality&sid=330a464a00000000&sni=online.1c.ru&type=tcp#%E2%9A%A12669ms-46
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A14637ms-0.5M-47
+vless://0c1b7949-fe09-43d9-863f-2c031f66bfc1@kvm1.avenone.ir:8402?encryption=none&security=none&type=tcp#%E2%9A%A111143ms-0.2M-48

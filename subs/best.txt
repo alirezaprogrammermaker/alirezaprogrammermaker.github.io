@@ -21,4 +21,5 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.232:443?security=reality&
 vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&security=reality&encryption=none&pbk=99MRki6b93wC-hhDHe9yq3IXE3KtPGw4RkFAnpI-8gg&fp=firefox&type=grpc&serviceName=app.v1.PushService&sni=md5.univesalsrv.com&sid=aa9884f2982b7d3c#%E2%9A%A11715ms-0.7M-21
 vless://0c1b7949-fe09-43d9-863f-2c031f66bfc1@kvm1.avenone.ir:8402/?type=tcp&encryption=none&flow=#%E2%9A%A111161ms-2.0M-22
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A14620ms-1.0M-23
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A14637ms-0.5M-24
+vless://042d2d08-2973-5d10-97ad-3b75f16bbe54@212.147.245.198:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=xwLNHc6jBOg5Ddr1LezwY7I45nP485Qfu1YJXMKwVnI&security=reality&sid=330a464a00000000&sni=online.1c.ru&type=tcp#%E2%9A%A12669ms-24
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A14637ms-0.5M-25
