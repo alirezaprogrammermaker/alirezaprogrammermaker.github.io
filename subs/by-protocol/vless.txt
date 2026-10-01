@@ -34,3 +34,5 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws&sni=mypanel.unixzone.us#%E2%9A%A15199ms-0.3M-34
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A16102ms-0.3M-35
 vless://0370b162-baff-4757-86cc-cce4bf07f6f1@78.111.89.171:443?security=reality&encryption=none&pbk=lYcMPEgf6ePmF_d8RXR5fsVorycW37v_ECl-fz_H6w4&headerType=none&fp=chrome&type=tcp&sni=www.cloudflare.com&sid=cfe08c23a85f24#%E2%9A%A17382ms-0.2M-36
+vless://0c1b7949-fe09-43d9-863f-2c031f66bfc1@kvm1.avenone.ir:8402/?type=tcp&encryption=none&flow=#%E2%9A%A111122ms-0.3M-37
+vless://0c1b7949-fe09-43d9-863f-2c031f66bfc1@kvm1.avenone.ir:8402?encryption=none&security=none&type=tcp#%E2%9A%A112161ms-0.2M-38
