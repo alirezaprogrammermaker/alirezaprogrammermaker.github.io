@@ -53,3 +53,4 @@ vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&se
 vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&security=reality&sni=www.apple.com&fp=chrome&pbk=bYW_MmB_CUHrsyoCAUKviI2LZdHf63yY2yOPXbih104&sid=9e419c0759b54d6f#%E2%9A%A1724ms-1.6M-53
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1664ms-1.3M-54
 vless://d4cae7df-50a1-428c-bd62-881c8f3bbd90@slowkd.sadiepinki.com:443?security=reality&encryption=none&pbk=z37XIezsPyfMgmdXyFd9qT4C4maDAs1OcRt-wfyrXVo&headerType=none&fp=firefox&spx=%2F&type=tcp&flow=xtls-rprx-vision&sni=slowkd.sadiepinki.com&sid=9c2378562188c3cb#%E2%9A%A15461ms-2.5M-55
+vless://042d2d08-2973-5d10-97ad-3b75f16bbe54@212.147.245.198:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=xwLNHc6jBOg5Ddr1LezwY7I45nP485Qfu1YJXMKwVnI&security=reality&sid=330a464a00000000&sni=online.1c.ru&type=tcp#%E2%9A%A14574ms-2.2M-56
