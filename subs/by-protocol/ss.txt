@@ -1,2 +1,2 @@
-ss://chacha20-ietf-poly1305:FD3rCuOsxOay@15.235.75.71:8388#%E2%9A%A1205ms-2.3M-1
-ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1709ms-1.3M-2
+ss://chacha20-ietf-poly1305:FD3rCuOsxOay@15.235.75.71:8388#%E2%9A%A1149ms-8.6M-1
+ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1676ms-1.4M-2
