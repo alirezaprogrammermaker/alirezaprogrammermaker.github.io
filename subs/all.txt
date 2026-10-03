@@ -48,3 +48,4 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.235:443?security=reality&
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.133:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=yahoo.com&fp=ios&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a&packetEncoding=xudp#%E2%9A%A15982ms-3.4M-48
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.133:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A15872ms-2.8M-49
 ss://chacha20-ietf-poly1305:MQC4oXhq62cUJ9uQ2kuS1w@62.217.181.57:8388#%E2%9A%A119812ms-0.8M-50
+vless://055a1ce8-2a16-4a0d-a2c2-22826c9b2413@47.253.226.114:443?security=reality&encryption=none&pbk=Svl81isn16RPAFnjtmYw7A6TPnsEPLHuYYaJht65Rzc&host=/?telegram--MARAMBASHI--MARAMBASHI--MARAMBASHI--MARAMBASHI&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com#%E2%9A%A116384ms-51
