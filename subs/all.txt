@@ -48,4 +48,5 @@ vless://2f35965a-9a9b-45fd-ba32-987296dfb6be@md5.univesalsrv.com:443?mode=gun&se
 vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&security=reality&sni=www.apple.com&fp=chrome&pbk=bYW_MmB_CUHrsyoCAUKviI2LZdHf63yY2yOPXbih104&sid=9e419c0759b54d6f#%E2%9A%A1966ms-1.2M-48
 hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-password=eba1b4766d2a26d6c167e2d2e9efabf4&insecure=0&sni=srv-8718e6.frd21.ru#%E2%9A%A11128ms-1.5M-49
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A1877ms-50
-vless://055a1ce8-2a16-4a0d-a2c2-22826c9b2413@47.253.226.114:443?security=reality&encryption=none&pbk=Svl81isn16RPAFnjtmYw7A6TPnsEPLHuYYaJht65Rzc&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com#%E2%9A%A110278ms-51
+ss://chacha20-ietf-poly1305:MQC4oXhq62cUJ9uQ2kuS1w@62.217.181.57:8388#%E2%9A%A11696ms-1.4M-51
+vless://055a1ce8-2a16-4a0d-a2c2-22826c9b2413@47.253.226.114:443?security=reality&encryption=none&pbk=Svl81isn16RPAFnjtmYw7A6TPnsEPLHuYYaJht65Rzc&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=www.cloudflare.com#%E2%9A%A110278ms-52
