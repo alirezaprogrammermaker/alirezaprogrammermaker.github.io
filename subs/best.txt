@@ -17,6 +17,8 @@ vless://0370b162-baff-4757-86cc-cce4bf07f6f1@78.111.89.171:443?security=reality&
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1704ms-1.3M-17
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A1931ms-18
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.95:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=yahoo.com&security=reality&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&sid=c39cc7310a#%E2%9A%A1247ms-8.5M-19
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws#%E2%9A%A13945ms-0.2M-20
-vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A14935ms-0.2M-21
-vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%E2%9A%A16129ms-22
+vless://04a7d3f9-a7cb-49a3-9ac0-a684d6909f0c@206.1.103.51:18534?security=reality&encryption=none&pbk=2YbVhbRxQ-FL2jI5hEPuittjBceKAomX60K07FnoHH0&fp=chrome&spx=/cd580e25234535d&type=grpc&sni=play.google.com&sid=f7#%E2%9A%A17879ms-20
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@mypanel.unixzone.us:12068?path=/&security=none&encryption=none&host=mypanel.unixzone.us&type=ws#%E2%9A%A13945ms-0.2M-21
+trojan://b16a661864984131a32ceb231869df51@mhzedir.qzz.io:49210?security=reality&sni=gtmetrix.com&fp=chrome&pbk=Q8niJeWw3hX4MHYZNbsIwd4NSQEMvHjch54pBxM5CDY&sid=c9908a0a4ef02102&spx=/fed2d5835856639&type=tcp&headerType=none#%E2%9A%A111315ms-22
+vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=&alpn=v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus--v2rayNplus&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A14935ms-0.2M-23
+vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%E2%9A%A16129ms-24

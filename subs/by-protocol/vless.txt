@@ -34,3 +34,4 @@ vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws&sni=85.17.145.65#%E2%9A%A17938ms-0.3M-34
 vless://cd3bb7d9-7df3-4644-ac05-c260990ac277@66.90.104.43:2083?encryption=none&security=none&type=grpc&mode=gun&authority=&serviceName=vless#%E2%9A%A16129ms-35
 vless://05caca6c-9e97-4c0f-8edf-7b88a6e572c5@85.17.145.65:12068?path=/&security=none&encryption=none&type=ws#%E2%9A%A16873ms-0.2M-36
+vless://04a7d3f9-a7cb-49a3-9ac0-a684d6909f0c@206.1.103.51:18534?security=reality&encryption=none&pbk=2YbVhbRxQ-FL2jI5hEPuittjBceKAomX60K07FnoHH0&fp=chrome&spx=/cd580e25234535d&type=grpc&sni=play.google.com&sid=f7#%E2%9A%A17879ms-37
