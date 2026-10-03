@@ -4,3 +4,4 @@ hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?sni=
 hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?security=tls&obfs=salamander&obfs-password=c1b4086fea89914496c7e10967a419216566&insecure=0&sni=hy2-new.aspidnet.xyz#%E2%9A%A1583ms-2.5M-4
 hysteria2://my_super_password_123@open.w2m.ink:443?sni=open.w2m.ink&insecure=1#%E2%9A%A1629ms-2.5M-5
 hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-password=eba1b4766d2a26d6c167e2d2e9efabf4&insecure=0&sni=srv-8718e6.frd21.ru#%E2%9A%A1860ms-1.9M-6
+hysteria2://8A9905B7-801B-41AF-BFC9-2034212770F6@sg4.dexlos.com:20654?security=tls&obfs=salamander&obfs-password=xK9mN2pLq5vR8wB3&insecure=0&sni=sg4.dexlos.com#%E2%9A%A1892ms-1.8M-7
