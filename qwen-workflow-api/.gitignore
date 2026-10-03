@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+node_modules/
+.wrangler/
+.dev.vars
+.env
+*.pyc
+.DS_Store
+python_modules/
+.venv-workers/
+uv.lock
+pylock.toml
+package-lock.json
+.qwen-config/
+*.session
