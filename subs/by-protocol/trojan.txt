@@ -1,1 +1,1 @@
-trojan://jqc8qbvdoh8nklk8@206.1.100.62:8080?security=none&headerType=none&type=tcp#%E2%9A%A13186ms-1
+trojan://jqc8qbvdoh8nklk8@206.1.100.62:8080?security=none&headerType=none&type=tcp#%E2%9A%A13246ms-0.5M-1
