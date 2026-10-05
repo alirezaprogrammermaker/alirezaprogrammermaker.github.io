@@ -48,3 +48,4 @@ ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%
 hysteria2://d042d150716709bb778cc73889cddb02@138.2.89.249:443/?insecure=1&obfs=salamander&obfs-password=309502c4a8df10b46fb976d4a8c43f42&sni=www.bing.com#%E2%9A%A1815ms-1.4M-48
 hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-password=eba1b4766d2a26d6c167e2d2e9efabf4&insecure=0&sni=srv-8718e6.frd21.ru#%E2%9A%A11147ms-1.7M-49
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.35:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=ios&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A14408ms-5.5M-50
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11676ms-51
