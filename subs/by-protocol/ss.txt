@@ -1,1 +1,2 @@
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1782ms-1.1M-1
+ss://2022-blake3-aes-256-gcm:6bmusPHoB2rXP7CkfTsEY8zAx2rGzOdXWgOJSrIzREA=:T7AKm5fGv9ODGnaqCUUlq7CgQ7GiOtLrLBW40MOp5wo=@206.1.103.221:32155?type=tcp#%E2%9A%A11689ms-1.4M-2
