@@ -1,0 +1,12 @@
+{
+  "name": "qwen-workflow-api",
+  "private": true,
+  "scripts": {
+    "dev": "uv run pywrangler dev",
+    "deploy": "uv run pywrangler deploy",
+    "types": "uv run pywrangler types"
+  },
+  "devDependencies": {
+    "wrangler": "^4.134.0"
+  }
+}

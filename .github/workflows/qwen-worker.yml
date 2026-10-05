@@ -1,0 +1,82 @@
+name: Qwen Workflow Worker
+
+on:
+  schedule:
+    # Every 6 hours — keep runner near-continuous under public GHA limits
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+    inputs:
+      max_jobs:
+        description: "Stop after N jobs (0 = unlimited within timeout)"
+        required: false
+        default: "0"
+      run_seconds:
+        description: "Max seconds to run (default ~5h50m)"
+        required: false
+        default: "21000"
+
+concurrency:
+  group: qwen-workflow-worker
+  cancel-in-progress: false
+
+jobs:
+  poll-and-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CLI + Playwright
+        working-directory: qwen-workflow-api
+        run: |
+          python -m pip install --upgrade pip
+          pip install rich click playwright
+          playwright install --with-deps chromium
+
+      - name: Cache Qwen browser profiles
+        uses: actions/cache@v4
+        with:
+          path: qwen-workflow-api/.qwen-config
+          key: qwen-profiles-${{ runner.os }}-${{ hashFiles('qwen-workflow-api/tools/qwen_cli.py') }}
+          restore-keys: |
+            qwen-profiles-${{ runner.os }}-
+
+      - name: Required secrets present
+        env:
+          BRIDGE_URL: ${{ secrets.BRIDGE_URL }}
+          WORKER_KEY: ${{ secrets.WORKER_KEY }}
+        run: |
+          if [ -z "$BRIDGE_URL" ] || [ -z "$WORKER_KEY" ]; then
+            echo "::error::Set repository secrets BRIDGE_URL and WORKER_KEY"
+            exit 1
+          fi
+          echo "BRIDGE_URL host=$(python - <<'PY'
+          import os
+          from urllib.parse import urlparse
+          print(urlparse(os.environ['BRIDGE_URL']).netloc)
+          PY
+          )"
+
+      - name: Run poller
+        working-directory: qwen-workflow-api
+        env:
+          BRIDGE_URL: ${{ secrets.BRIDGE_URL }}
+          WORKER_KEY: ${{ secrets.WORKER_KEY }}
+          QWEN_CLI_PATH: ${{ github.workspace }}/qwen-workflow-api/tools/qwen_cli.py
+          QWEN_CLI_CONFIG_DIR: ${{ github.workspace }}/qwen-workflow-api/.qwen-config
+          POLL_SECONDS: "8"
+          WORKER_ID: gha-${{ github.run_id }}
+          MAX_JOBS: ${{ github.event.inputs.max_jobs || '0' }}
+          RUN_SECONDS: ${{ github.event.inputs.run_seconds || '21000' }}
+          IDLE_EXITS: "0"
+          JOB_TIMEOUT: "600"
+        run: python poller/poller.py
