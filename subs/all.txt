@@ -42,4 +42,5 @@ vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&secur
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1801ms-1.1M-42
 hysteria2://ca78f919e6@155.94.134.183:11592?security=tls&obfs=salamander&obfs-password=ec66908dbc46e6920143d9b684adf277&insecure=0&sni=srv-3fc7c9.21freedom.net#%E2%9A%A1662ms-0.5M-43
 hysteria2://ca78f919e6@155.94.134.183:11592/?obfs=salamander&obfs-password=ec66908dbc46e6920143d9b684adf277&sni=srv-3fc7c9.21freedom.net#%E2%9A%A1651ms-0.3M-44
-vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&security=reality&sid=68aaa5222092bbea&sni=download.amd.com&type=tcp#%E2%9A%A11041ms-0.3M-45
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11187ms-45
+vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&security=reality&sid=68aaa5222092bbea&sni=download.amd.com&type=tcp#%E2%9A%A11041ms-0.3M-46
