@@ -8,6 +8,7 @@ hysteria2://QCgqi_I4EkV8UR-OgQ_tG4EnVTEVvIyR2GgRBzrIn2s@162.249.125.133:443?secu
 trojan://g44i2hzwivmm7r29@195.15.202.111:4455?security=reality&pbk=f4lHcjcn_RbaaNCQonkTpOyRhfPKWYxpYvL03kCXemo&headerType=none&fp=chrome&spx=/824fc1bd087b613&type=tcp&sni=play-apps-features.googleusercontent.com&sid=befb#%E2%9A%A1615ms-1.7M-8
 vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A1576ms-1.5M-9
 vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&security=reality&sni=www.apple.com&fp=chrome&pbk=bYW_MmB_CUHrsyoCAUKviI2LZdHf63yY2yOPXbih104&sid=9e419c0759b54d6f#%E2%9A%A1835ms-1.3M-10
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.202:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A1369ms-3.6M-11
-vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&security=reality&sid=90ec9bba2019&sni=web.eitaa.com&type=tcp#%E2%9A%A13725ms-1.4M-12
-ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A15324ms-1.1M-13
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11080ms-11
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.202:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A1369ms-3.6M-12
+vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&security=reality&sid=90ec9bba2019&sni=web.eitaa.com&type=tcp#%E2%9A%A13725ms-1.4M-13
+ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A15324ms-1.1M-14
