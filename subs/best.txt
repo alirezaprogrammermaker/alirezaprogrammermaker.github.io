@@ -11,4 +11,5 @@ vless://2b781b4a-5942-48e0-a7f3-5a07b7b488c1@185.147.26.207:443?encryption=none&
 vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&security=reality&sid=90ec9bba2019&sni=web.eitaa.com&type=tcp#%E2%9A%A1691ms-1.0M-11
 vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&security=reality&sni=www.apple.com&fp=chrome&pbk=bYW_MmB_CUHrsyoCAUKviI2LZdHf63yY2yOPXbih104&sid=9e419c0759b54d6f#%E2%9A%A1849ms-1.3M-12
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1851ms-1.1M-13
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.182:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A1363ms-3.7M-14
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A1896ms-14
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.182:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A1363ms-3.7M-15
