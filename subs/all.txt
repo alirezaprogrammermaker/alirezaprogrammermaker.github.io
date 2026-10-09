@@ -38,5 +38,6 @@ hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-pa
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1662ms-1.1M-38
 hysteria2://WvH8ooM9hom4KOOJHFJz1x5umE0aV4R0@43.156.36.253:8443/?insecure=1&sni=tx-hy2#%E2%9A%A1912ms-1.7M-39
 vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A1631ms-0.5M-40
-vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11059ms-41
-vless://01de63ee-d2d6-4842-b2f0-d54c7eca267a@20.205.14.234:26480?security=reality&encryption=none&pbk=thefrz26hPQjCrKszJ6m_41nLmThPGkTEKBjYVDGM0E&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=addons.mozilla.org#%E2%9A%A12842ms-0.4M-42
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11028ms-41
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11059ms-42
+vless://01de63ee-d2d6-4842-b2f0-d54c7eca267a@20.205.14.234:26480?security=reality&encryption=none&pbk=thefrz26hPQjCrKszJ6m_41nLmThPGkTEKBjYVDGM0E&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=addons.mozilla.org#%E2%9A%A12842ms-0.4M-43
