@@ -1,2 +1,2 @@
-ss://chacha20-ietf-poly1305:y7KeRTzmH0vXT2kp@c3.nastuh.link:443#%E2%9A%A1293ms-3.1M-1
-ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1677ms-1.1M-2
+ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1664ms-1.3M-1
+ss://chacha20-ietf-poly1305:y7KeRTzmH0vXT2kp@c3.nastuh.link:443#%E2%9A%A13390ms-1.2M-2
