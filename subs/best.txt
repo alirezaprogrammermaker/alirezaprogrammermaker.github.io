@@ -15,4 +15,5 @@ vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&secur
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1662ms-0.9M-15
 vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A1682ms-0.4M-16
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.35:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A188ms-8.4M-17
-vless://01de63ee-d2d6-4842-b2f0-d54c7eca267a@20.205.14.234:26480?security=reality&encryption=none&pbk=thefrz26hPQjCrKszJ6m_41nLmThPGkTEKBjYVDGM0E&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=addons.mozilla.org#%E2%9A%A111453ms-0.1M-18
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11216ms-18
+vless://01de63ee-d2d6-4842-b2f0-d54c7eca267a@20.205.14.234:26480?security=reality&encryption=none&pbk=thefrz26hPQjCrKszJ6m_41nLmThPGkTEKBjYVDGM0E&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=addons.mozilla.org#%E2%9A%A111453ms-0.1M-19
