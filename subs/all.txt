@@ -36,6 +36,7 @@ vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?encryption=none&flo
 vless://0eed6293-8cf1-4e77-ac10-9c3d50d0b2f8@151.241.226.201:2053?type=tcp&security=reality&sni=www.apple.com&fp=chrome&pbk=bYW_MmB_CUHrsyoCAUKviI2LZdHf63yY2yOPXbih104&sid=9e419c0759b54d6f#%E2%9A%A1811ms-1.4M-36
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1751ms-1.0M-37
 trojan://95621b8e-5cf7-4123-9df4-38d903054a1b@193.233.216.27:443?mode=gun&security=reality&pbk=1HzJEMaYCrx2QQhuLLkcFiE5r2NegGHTBzHu0Sk1iWs&fp=chrome&spx=/&type=grpc&serviceName=62eec6c16880&sni=www.garmin.com&sid=4e34d88e858485db#%E2%9A%A11182ms-1.5M-38
-vless://03dc60cb-a8d4-4226-93fe-0e6cbf77fe5a@uspanel.unixzone.us:30016?encryption=none&host=uspanel.unixzone.us&path=/usserver&security=none&type=ws#%E2%9A%A18667ms-1.2M-39
-vless://03dc60cb-a8d4-4226-93fe-0e6cbf77fe5a@69.48.201.136:30016?encryption=none&host=uspanel.unixzone.us&path=/usserver&security=none&type=ws#%E2%9A%A18072ms-1.0M-40
-vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A12619ms-0.2M-41
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&fp=chrome&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A11671ms-39
+vless://03dc60cb-a8d4-4226-93fe-0e6cbf77fe5a@uspanel.unixzone.us:30016?encryption=none&host=uspanel.unixzone.us&path=/usserver&security=none&type=ws#%E2%9A%A18667ms-1.2M-40
+vless://03dc60cb-a8d4-4226-93fe-0e6cbf77fe5a@69.48.201.136:30016?encryption=none&host=uspanel.unixzone.us&path=/usserver&security=none&type=ws#%E2%9A%A18072ms-1.0M-41
+vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A12619ms-0.2M-42
