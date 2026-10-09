@@ -34,3 +34,4 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.15:443?encryption=none&fl
 vless://03dc60cb-a8d4-4226-93fe-0e6cbf77fe5a@uspanel.unixzone.us:30016?encryption=none&host=uspanel.unixzone.us&path=/usserver&security=none&type=ws#%E2%9A%A15277ms-4.6M-34
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.163:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A14551ms-3.7M-35
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.104:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A12024ms-0.7M-36
+ss://chacha20-ietf-poly1305:y7KeRTzmH0vXT2kp@c3.nastuh.link:443#%E2%9A%A12363ms-0.3M-37
