@@ -45,3 +45,4 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.89:443?security=reality&e
 hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010/?obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&sni=nas.aizhzo.com#%E2%9A%A13662ms-0.6M-45
 vless://0a322246-8c1a-47cd-9865-cccebbb2e5c1@31.76.64.248:443?encryption=none&security=reality&type=tcp&sni=blog.api.www.cloudflare.com&flow=xtls-rprx-vision&fp=firefox&pbk=9OV_GN4lgwY_4llPfYCGev-PPXLMj-hfYnveKF4tjws&sid=f8#%E2%9A%A14432ms-0.4M-46
 hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@152.32.254.68:5010/?obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&sni=nas.aizhzo.com#%E2%9A%A112358ms-0.5M-47
+vless://025a80fb-233b-4714-b02d-f4384c653d58@103.27.157.120:443?security=reality&encryption=none&pbk=k0883nIGfstbzb8hES-dQ1yPcBwbUbnsyg4w-UA5gkA&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=download.amd.com&sid=68aaa5222092bbea#%E2%9A%A115201ms-0.1M-48
