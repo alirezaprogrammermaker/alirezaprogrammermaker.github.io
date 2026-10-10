@@ -1,2 +1,2 @@
-ss://2022-blake3-aes-128-gcm:NzJlOTQ5NWYtM2ZkYi00Cg==@103.11.76.248:28679#%E2%9A%A1227ms-1.6M-1
-ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1735ms-1.2M-2
+ss://2022-blake3-aes-128-gcm:NzJlOTQ5NWYtM2ZkYi00Cg==@103.11.76.248:28679#%E2%9A%A1345ms-4.2M-1
+ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1730ms-1.1M-2
