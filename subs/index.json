@@ -1,7 +1,7 @@
 {
-  "count_all": 43,
-  "count_best": 19,
-  "count_best_hy2": 6,
+  "count_all": 40,
+  "count_best": 17,
+  "count_best_hy2": 4,
   "files": {
     "all": "all.txt",
     "all_base64": "all.base64",
