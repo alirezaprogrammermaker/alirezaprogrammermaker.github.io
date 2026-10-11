@@ -38,5 +38,6 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.225:443?security=reality&
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.104:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A11966ms-0.5M-38
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.179:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=&fp=ios&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A12480ms-0.9M-39
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.74:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A12481ms-0.8M-40
-hy2://H7mP2xY9kJ4nQ8wR5tF6vB3z@35.158.96.132:443?insecure=1&sni=vpn-de-002.fastervpn.world#%E2%9A%A13530ms-0.4M-41
-vless://019fbe0f-2d9f-4b89-9f81-e1e36129892a@co-a.speedtec.ru:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=co-pl.speedtec.ru&fp=chrome&security=reality&pbk=EBISh6QAVskJ_nvet-Qio9jS2yqxe9de6GMScYlbjhI&sid=226509f017e4c36d#%E2%9A%A17061ms-0.3M-42
+hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A13080ms-0.8M-41
+hy2://H7mP2xY9kJ4nQ8wR5tF6vB3z@35.158.96.132:443?insecure=1&sni=vpn-de-002.fastervpn.world#%E2%9A%A13530ms-0.4M-42
+vless://019fbe0f-2d9f-4b89-9f81-e1e36129892a@co-a.speedtec.ru:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=co-pl.speedtec.ru&fp=chrome&security=reality&pbk=EBISh6QAVskJ_nvet-Qio9jS2yqxe9de6GMScYlbjhI&sid=226509f017e4c36d#%E2%9A%A17061ms-0.3M-43
