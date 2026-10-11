@@ -1,2 +1,2 @@
-trojan://ea4y8s7qdshp547j@195.15.202.111:4455?security=reality&sni=play-apps-features.googleusercontent.com&fp=chrome&pbk=f4lHcjcn_RbaaNCQonkTpOyRhfPKWYxpYvL03kCXemo&sid=9b6b4ff59dce3d&spx=/3b2238cdad49967&type=tcp&headerType=none#%E2%9A%A1664ms-1.6M-1
-trojan://ea4y8s7qdshp547j@195.15.202.111:4455?fp=&pbk=f4lHcjcn_RbaaNCQonkTpOyRhfPKWYxpYvL03kCXemo&security=reality&sid=9b6b4ff59dce3d&sni=play-apps-features.googleusercontent.com#%E2%9A%A1674ms-1.6M-2
+trojan://ea4y8s7qdshp547j@195.15.202.111:4455?security=reality&sni=play-apps-features.googleusercontent.com&fp=chrome&pbk=f4lHcjcn_RbaaNCQonkTpOyRhfPKWYxpYvL03kCXemo&sid=9b6b4ff59dce3d&spx=/3b2238cdad49967&type=tcp&headerType=none#%E2%9A%A1655ms-1.6M-1
+trojan://ea4y8s7qdshp547j@195.15.202.111:4455?fp=&pbk=f4lHcjcn_RbaaNCQonkTpOyRhfPKWYxpYvL03kCXemo&security=reality&sid=9b6b4ff59dce3d&sni=play-apps-features.googleusercontent.com#%E2%9A%A1665ms-1.5M-2
