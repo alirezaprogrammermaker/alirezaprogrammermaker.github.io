@@ -33,5 +33,6 @@ vless://e75ad2eb-6c1f-45ce-8023-f5f10875df66@205.237.110.254:443?security=realit
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.104:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A11205ms-3.9M-33
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1759ms-0.7M-34
 vless://0a322246-8c1a-47cd-9865-cccebbb2e5c1@31.76.64.248:443?encryption=none&security=reality&type=tcp&sni=blog.api.www.cloudflare.com&flow=xtls-rprx-vision&fp=firefox&pbk=9OV_GN4lgwY_4llPfYCGev-PPXLMj-hfYnveKF4tjws&sid=f8#%E2%9A%A11070ms-0.6M-35
-vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?security=reality&encryption=none&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=web.eitaa.com&sid=90ec9bba2019#%E2%9A%A16324ms-1.0M-36
-hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A118718ms-0.2M-37
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11591ms-36
+vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?security=reality&encryption=none&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&headerType=none&type=tcp&flow=xtls-rprx-vision&sni=web.eitaa.com&sid=90ec9bba2019#%E2%9A%A16324ms-1.0M-37
+hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A118718ms-0.2M-38
