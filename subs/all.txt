@@ -38,3 +38,4 @@ vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.35:443?security=reality&e
 vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@104.18.0.181:2082?path=%2Ffp&security=none&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws&sni=hhlfy.twiladaphne.ndjp.net#%E2%9A%A1810ms-38
 hysteria2://HowdyHysteria2023w0W@51.15.19.206:8443/?sni=viber.com&obfs=salamander&obfs-password=HysteriaHowdy&insecure=1#%E2%9A%A1546ms-0.3M-39
 vless://8df2e661-6f46-471b-9133-7fc13a0daa35@65.108.3.59:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=jDoORbrtDrvAlFSo19CJbc99C4ev8SAo1MwczSUt9no&security=reality&sid=90ec9bba2019&sni=web.eitaa.com&type=tcp#%E2%9A%A1700ms-0.4M-40
+vless://e5cc16a6-ea42-46b2-82ae-ad2157e1641b@172.64.150.28:2082?path=%2Ffp&security=&encryption=none&host=hhlfy.twiladaphne.ndjp.net&type=ws#%E2%9A%A11394ms-41
