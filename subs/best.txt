@@ -17,4 +17,5 @@ vless://e75ad2eb-6c1f-45ce-8023-f5f10875df66@205.237.110.254:443?security=realit
 ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1731ms-1.0M-17
 hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-password=eba1b4766d2a26d6c167e2d2e9efabf4&insecure=0&sni=srv-8718e6.frd21.ru#%E2%9A%A11679ms-1.8M-18
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.182:443?encryption=none&flow=xtls-rprx-vision&fp=&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&security=reality&sid=c39cc7310a&sni=yahoo.com&type=tcp#%E2%9A%A1288ms-5.6M-19
-vless://019fbe0f-2d9f-4b89-9f81-e1e36129892a@77.110.105.122:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=co-de.speedtec.ru&fp=chrome&pbk=EBISh6QAVskJ_nvet-Qio9jS2yqxe9de6GMScYlbjhI&sid=226509f017e4c36d&type=tcp&headerType=none#%E2%9A%A16569ms-0.4M-20
+hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A16111ms-0.7M-20
+vless://019fbe0f-2d9f-4b89-9f81-e1e36129892a@77.110.105.122:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=co-de.speedtec.ru&fp=chrome&pbk=EBISh6QAVskJ_nvet-Qio9jS2yqxe9de6GMScYlbjhI&sid=226509f017e4c36d&type=tcp&headerType=none#%E2%9A%A16569ms-0.4M-21
