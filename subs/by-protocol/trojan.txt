@@ -1,1 +1,1 @@
-trojan://cMCQxnflDO@31.76.10.180:36508?type=tcp&security=none#%E2%9A%A1522ms-2.2M-1
+trojan://cMCQxnflDO@31.76.10.180:36508?type=tcp&security=none#%E2%9A%A13404ms-1.8M-1
