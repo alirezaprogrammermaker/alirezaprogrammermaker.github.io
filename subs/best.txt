@@ -18,5 +18,6 @@ vless://f55e9aba-7b14-4f6f-b59a-d5b3d45c9309@185.200.199.199:8444?mode=gun&secur
 hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A1916ms-1.9M-18
 hysteria2://033dc6b532@77.232.139.128:11592?security=tls&obfs=salamander&obfs-password=eba1b4766d2a26d6c167e2d2e9efabf4&insecure=0&sni=srv-8718e6.frd21.ru#%E2%9A%A1927ms-1.8M-19
 vless://adc11f30-e4cb-4985-bf5e-f9ded69c019f@2.59.253.251:443/?type=tcp&encryption=none&flow=xtls-rprx-vision&sni=nvidia.com&fp=firefox&security=reality&pbk=fNfokzklCF4l_c8k8PciOCjm5ecNoF_sNLjEtaO-xzI&sid=db04ce8bdb8900f1#%E2%9A%A1515ms-2.2M-20
-ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1665ms-1.2M-21
-vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.184:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=&fp=ios&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A168ms-16M-22
+vless://0011d187-d066-48f6-957c-a6983dd63a77@83.217.9.254:443?security=reality&encryption=none&pbk=c-LdrrjWXggAWcOkfbwawezHTcw7Bx0kzs973IDFBmM&headerType=none&fp=chrome&type=tcp&sni=tr.netvora.space&sid=93980c41b30b2d60#%E2%9A%A1531ms-1.9M-21
+ss://chacha20-ietf-poly1305:Xsy8Ox4yOV3xLlpxtjzs3X@102.133.165.160:16233#%E2%9A%A1665ms-1.2M-22
+vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.184:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=&fp=ios&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A168ms-16M-23
