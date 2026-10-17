@@ -43,3 +43,4 @@ hysteria2://HowdyHysteria2023w0W@51.15.19.206:8443/?insecure=1&obfs=salamander&o
 vless://d65cc14c-f53f-4fe2-b262-97856601319c@169.40.42.225:443?security=reality&encryption=none&pbk=e2RLf57Li_-MDZGE9ss1BWPgP54mqRb5PfXhW2jcVVg&headerType=none&fp=chrome&type=tcp&flow=xtls-rprx-vision&sni=yahoo.com&sid=c39cc7310a#%E2%9A%A12294ms-6.0M-43
 trojan://cMCQxnflDO@31.76.10.180:36508?security=none#%E2%9A%A11634ms-2.7M-44
 trojan://cMCQxnflDO@31.76.10.180:36508?type=tcp&security=none#%E2%9A%A11762ms-2.6M-45
+hysteria2://eBTe6Ax2pUts8oMEWoYVDfnSlHfkLffQ@nas.aizhzo.com:5010?security=tls&obfs=salamander&obfs-password=7M4RXPFcQyQEGbkxBPfXo4bilMhCW2U9&insecure=0&sni=nas.aizhzo.com#%E2%9A%A12374ms-1.5M-46
